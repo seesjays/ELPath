@@ -1,12 +1,7 @@
-from dearpygui import core, simple
+import dearpygui
+from dearpygui.core import start_dearpygui
+from dearpygui.demo import show_demo
 
-def save_callback(sender, data):
-    print("Save Clicked")
 
-with simple.window("Example Window"):
-    core.add_text("Hello world")
-    core.add_button("Save", callback=save_callback)
-    core.add_input_text("string")
-    core.add_slider_float("float")
-
-core.start_dearpygui()
+show_demo()
+start_dearpygui()
