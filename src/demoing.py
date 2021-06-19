@@ -18,9 +18,8 @@ def plot_callback(sender, data):
 
     print(data1x[0:50])
     print(data1y[0:50])
-    add_bar_series("Plot", "Cos", [i for i in range(0, 100)], [i for i in range(1, 101)], weight=0.5)
-    add_shade_series("Plot", "Cos", data1x, data1y, weight=2, fill=[255, 0, 0, 100])
-    add_scatter_series("Plot", "Sin", data2x, data2y, outline=[0, 255, 0, 100])
+    add_bar_series("Plot", "Cos", [i for i in range(0, 10)], [i for i in range(7, 17)], weight=0.5)
+
 
 with window("Tutorial"):
     add_button("Plot data", callback=plot_callback)
