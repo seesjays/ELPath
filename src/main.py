@@ -62,14 +62,15 @@ def bubble(data):
     print(data)
 
 with window("SortSim", height=5*WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
-    valz = [1, 2, 3, 4]
-    add_plot("Simpleplot2", height=380, width=-1, 
-    **UNINTERACTIVE_GRAPH_PARAMS
-    )
-    add_bar_series("Simpleplot2", "", testvalset, [i for i in range(1, 6)], weight=1)
-    limits = calclimits(testvalset)
+    valz = [i for i in range(1, 50)]
+    add_plot("Simpleplot2", height=380, width=-1, **UNINTERACTIVE_GRAPH_PARAMS)
+    add_bar_series("Simpleplot2", "", valz, valz, weight=0.5)
+    limits = calclimits(valz)
     set_plot_xlimits("Simpleplot2", limits[0], limits[1])
     set_plot_ylimits("Simpleplot2", 0, limits[2])
+
+    add_bar_series("Simpleplot2", "selection", valz[25:30], valz[25:30], weight=0.5)
+
 
     set_window_pos("SortSim", 0, WINDOW_HEIGHT//6)
 
