@@ -14,7 +14,6 @@ CHILD_WINDOW_FILL_PARAMS = {
     "no_move": True
 }
 
-
 def intializeElPath():
     # Window settings
     set_global_font_scale(1.5);

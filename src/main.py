@@ -65,16 +65,25 @@ def highlighttest(dataset):
     add_bar_series("Algorithm", "selection", [position], [yVals[position]], weight=0.5)
     sleep(0.5)
 
+def bubble(data):
+    n = len(data)
+    for i in range(n-1):
+        for j in range(0, n-i-1):
+            if data[j] > data[j + 1]:
+                data[j], data[j + 1] = data[j + 1], data[j]
+            add_bar_series("Algorithm", "selection", [xVals[j], xVals[j+1]], [data[j], data[j+1]], weight=0.5)
+            add_bar_series("Algorithm", "data", xVals, data, weight=0.5)
+            sleep(0.1)
+            
+
 with window("SortSim", height=5*WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
+    add_button("bubble", callback=(lambda bub: bubble(yVals)))
     add_plot("Algorithm", height=380, width=-1, **UNINTERACTIVE_GRAPH_PARAMS)
-    add_bar_series("Algorithm", "", xVals, yVals, weight=0.5)
+    add_bar_series("Algorithm", "data", xVals, yVals, weight=0.5)
     
     add_data("position", 0)
 
-    setLimits(yVals)    
-
-    set_render_callback(lambda x: highlighttest(yVals))
-
+    setLimits(yVals)
     set_window_pos("SortSim", 0, WINDOW_HEIGHT//6)
 
 start_dearpygui(primary_window="ELPath") 
