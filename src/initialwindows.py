@@ -14,7 +14,7 @@ CHILD_WINDOW_FILL_PARAMS = {
     "no_move": True
 }
 
-def intializeElPath():
+def initialize_ELPath():
     # Window settings
     set_global_font_scale(1.5);
     set_theme("Dark Grey")
@@ -25,6 +25,10 @@ def intializeElPath():
     with window("ELPath", width=880, height=880):
         set_window_pos("ELPath", 0, 0)
 
-    with window("Main Controls", height=WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
-        add_text("This is the start of something interestnig")
-        set_window_pos("Main Controls", 0, 0)
+    with window("Main Controls", x_pos=0, y_pos=0, height=WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
+        add_text("Algorithm: Bubble Sort") # hardcoded for now, since we only have bubble sort haha
+        add_spacing(count=5, name="spacing1")
+
+def link_buttons(start_callback, randomize_callback):
+    add_button("Start", parent="Main Controls", callback=start_callback)
+    add_button("Randomize Data", parent="Main Controls", callback=randomize_callback)
