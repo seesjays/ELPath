@@ -36,7 +36,12 @@ class AlgorithmHost:
         self.current_algorithm = self.alg_list[self.alg_name](self.data_y)
 
     def next_step(self):
-        for new_data in self.current_algorithm:
-            self.update_callback(new_data)
-            sleep(self.step_sleep)
-            print(new_data)
+        try:
+            self.update_callback(next(self.current_algorithm))
+        except StopIteration:
+            self.update_callback(1)
+
+    def start_sim(self):
+        pass
+
+        
