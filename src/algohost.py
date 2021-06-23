@@ -6,7 +6,7 @@ class AlgorithmHost:
     def __init__(self, dataUpdateCallback, data_set=[]):
         self.data_set_size = 30
 
-        self.paused = False
+        self.running = False
         self.step_sleep = 0.05
 
         self.current_algorithm = None
@@ -22,11 +22,12 @@ class AlgorithmHost:
         self.update_callback = dataUpdateCallback
         if not data_set:
             self.set_random_data()
-        
-    def simulation_unpause(self):
-        self.paused = False
-    def simulation_pause(self):
-        self.paused = True
+    
+    def sim_change_pause_state(self):
+        if self.running:
+            self.running = False
+        else:
+            self.running = True
 
     def set_algorithm(self, name):
         self.current_algorithm = self.alg_list[name](self.data_y)
@@ -41,7 +42,10 @@ class AlgorithmHost:
         except StopIteration:
             self.update_callback(1)
 
-    def start_sim(self):
-        pass
+    def change_sim_state(self):
+        for i in self.current_algorithm:
+            self.update_callback(i)
+            sleep(self.step_sleep)
+        self.update_callback(1)
 
         
