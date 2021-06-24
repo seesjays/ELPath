@@ -29,25 +29,40 @@ def initialize_ELPath():
         add_text("Algorithm: Bubble Sort") # hardcoded for now, since we only have bubble sort haha
         add_spacing(count=5, name="spacing1")
 
-def link_buttons(start_callback, next_step_callback, randomize_callback):
+def link_buttons(callbacks):
     # Have to use a list for callback_data because for some reason, passing in a function reference as the data runs said function 
-    add_button("start_button", label="Start", parent="Main Controls", callback=master_callback, callback_data=[start_callback])
+    add_button("start_button", label="Start", parent="Main Controls", callback=master_callback, callback_data=callbacks)
     add_same_line(parent="Main Controls")
-    add_button("next_step_button", label="Next Step", parent="Main Controls", callback=master_callback, callback_data=[next_step_callback])
+    add_button("stop_button", label="Stop", parent="Main Controls", callback=master_callback, callback_data=callbacks)
     add_same_line(parent="Main Controls")
-    add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=master_callback, callback_data=[randomize_callback])
+    add_button("next_step_button", label="Next Step", parent="Main Controls", callback=master_callback, callback_data=callbacks)
+    add_same_line(parent="Main Controls")
+    add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=master_callback, callback_data=callbacks)
 
-def master_callback(sender, subcallback):
+def master_callback(sender, callbacks):
     if (sender == "start_button"):
         currentname = get_item_label(sender)
         if (currentname == "Start"):
-            set_item_label(sender, "Pause")
-            subcallback[0]()
+            print("starting")
+            callbacks["start_sim"]()
         else:
+            print("stopping")
             set_item_label(sender, "Start")
+            callbacks["stop_sim"]()
+
+    if (sender == "stop_button"):
+        currentname = get_item_label(sender)
+        if (currentname == "Start"):
+            print("starting")
+            set_item_label(sender, "Pause")
+            callbacks["start_sim"]()
+        else:
+            print("stopping")
+            set_item_label(sender, "Start")
+            callbacks["stop_sim"]()
 
     if (sender == "next_step_button"):
-        subcallback[0]()
+        callbacks["next_step"]()
 
     if (sender == "randomize_button"):
-        subcallback[0]()
+        callbacks["randomize"]()
