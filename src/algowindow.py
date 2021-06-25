@@ -30,6 +30,9 @@ class AlgorithmWindow:
 
     def initialize_plot(self):
         add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
+        # clear other series
+        add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
+        add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
 
     # For now, just redraw everything, specific graph redraw can be slated for later
     # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
