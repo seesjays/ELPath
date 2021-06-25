@@ -7,7 +7,6 @@ class AlgorithmHost:
         self.data_set_size = 30
 
         self.running = False
-        self.step_sleep = 0.05
 
         self.current_algorithm = "bubble_sort"
 
@@ -40,7 +39,7 @@ class AlgorithmHost:
         try:
             return next(self.current_algorithm)
         except StopIteration:
-            self.update_callback(1)
+            return 1
 
 
         

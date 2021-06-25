@@ -5,6 +5,4 @@ from ELPath import *
 
 ELPath = ELPath()
 
-start_dearpygui(primary_window="ELPath") 
-
-
+start_dearpygui(primary_window="ELPath")

@@ -16,8 +16,6 @@ CHILD_WINDOW_FILL_PARAMS = {
     "no_move": True
 }
 
-
-
 class ELPath():
     def __init__(self):
         # Window settings
@@ -33,26 +31,19 @@ class ELPath():
         with window("Main Controls", x_pos=0, y_pos=0, height=WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
             add_text("Algorithm: Bubble Sort") # hardcoded for now, since we only have bubble sort haha
             add_spacing(count=5, name="spacing1")
-            
-        self.algorithms = AlgorithmWindow(self.algorithms_host)
+
+        self.algorithms = AlgorithmWindow()
         self.callbacks = {
-            "next_step": self.algorithms.next_step,
+            "run_sim": self.algorithms.run_sim,
             "randomize": self.algorithms.new_dataset
         }
         self.__link_controls()
 
     def __link_controls(self):
-        add_checkbox("start_checkbox", label="Running")
         # Have to use a list for callback_data because for some reason, passing in a function reference as the data runs said function 
+        add_checkbox("run_sim", label="Run Simulation", parent="Main Controls", callback=self.callbacks["run_sim"])
         add_same_line(parent="Main Controls")
-        add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.master_callback)
-        
-
-    def master_callback(self, sender):
-        if (sender == "next_step_button"):
-            self.callbacks["next_step"]()
-
-        if (sender == "randomize_button"):
-            self.callbacks["randomize"]()
+        add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
+            
 
 

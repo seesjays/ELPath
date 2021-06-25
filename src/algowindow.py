@@ -7,11 +7,12 @@ from time import sleep
 
 class AlgorithmWindow:
     def __init__(self):
-        self.algorithms_host = AlgorithmHost()
-        
         with window("SortSim", height=5*WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
             add_plot("Algorithm", height=380, width=-1, **UNINTERACTIVE_GRAPH_PARAMS)
             set_window_pos("SortSim", 0, WINDOW_HEIGHT//6)
+
+        self.algorithms_host = AlgorithmHost()
+        self.step_sleep = 0.05
 
         self.initialize_plot()
         self.set_limits()        
@@ -50,4 +51,9 @@ class AlgorithmWindow:
         self.initialize_plot()
 
     def next_step(self):
-        self.algorithms_host.next_step()
+        self.update(self.algorithms_host.next_step())
+
+    def run_sim(self, sender):
+        while get_value(sender):
+            self.next_step()
+            sleep(self.step_sleep)
