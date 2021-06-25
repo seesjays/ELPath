@@ -3,13 +3,13 @@ from random import randint
 from time import sleep
 
 class AlgorithmHost:
-    def __init__(self, dataUpdateCallback, data_set=[]):
+    def __init__(self, data_set=[]):
         self.data_set_size = 30
 
         self.running = False
         self.step_sleep = 0.05
 
-        self.current_algorithm = None
+        self.current_algorithm = "bubble_sort"
 
         self.data_x = [i for i in range(self.data_set_size)]
         self.data_y = []
@@ -19,7 +19,7 @@ class AlgorithmHost:
             "Bubble Sort": (lambda dataset: bubble(self.data_y))
         }
 
-        self.update_callback = dataUpdateCallback
+        self.update_callback = None
         if not data_set:
             self.set_random_data()
     
@@ -38,14 +38,9 @@ class AlgorithmHost:
 
     def next_step(self):
         try:
-            self.update_callback(next(self.current_algorithm))
+            return next(self.current_algorithm)
         except StopIteration:
             self.update_callback(1)
 
-    def change_sim_state(self):
-        for i in self.current_algorithm:
-            self.update_callback(i)
-            sleep(self.step_sleep)
-        self.update_callback(1)
 
         
