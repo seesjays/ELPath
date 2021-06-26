@@ -39,7 +39,7 @@ class AlgorithmHost:
         try:
             return next(self.current_algorithm)
         except StopIteration:
-            return 1
+            return False
 
 
         

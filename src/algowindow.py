@@ -37,7 +37,7 @@ class AlgorithmWindow:
     # For now, just redraw everything, specific graph redraw can be slated for later
     # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
     def update(self, new_data):
-        if (new_data == 1):
+        if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
             add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
         else:
@@ -54,9 +54,18 @@ class AlgorithmWindow:
         self.initialize_plot()
 
     def next_step(self):
-        self.update(self.algorithms_host.next_step())
+        value = self.algorithms_host.next_step()
+        self.update(value)
+        return value
 
-    def run_sim(self, sender):
+    def run_sim(self, sender, randomizebutton):
         while get_value(sender):
-            self.next_step()
+            i = self.next_step()
             sleep(self.step_sleep)
+            configure_item(randomizebutton, enabled=False)
+            
+            if (not i):
+                set_value(sender, False)
+                break
+
+        configure_item(randomizebutton, enabled=True)

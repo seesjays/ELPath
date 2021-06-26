@@ -41,9 +41,6 @@ class ELPath():
 
     def __link_controls(self):
         # Have to use a list for callback_data because for some reason, passing in a function reference as the data runs said function 
-        add_checkbox("run_sim", label="Run Simulation", parent="Main Controls", callback=self.callbacks["run_sim"])
+        add_checkbox("run_sim", label="Run Simulation", parent="Main Controls", callback=self.callbacks["run_sim"], callback_data="randomize_button")
         add_same_line(parent="Main Controls")
         add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
-            
-
-
