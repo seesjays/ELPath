@@ -9,10 +9,9 @@ class AlgorithmWindow:
     def __init__(self):
         with window("SortSim", height=5*WINDOW_HEIGHT//6, **CHILD_WINDOW_FILL_PARAMS):
             add_plot("Algorithm", height=380, width=-1, **UNINTERACTIVE_GRAPH_PARAMS)
-            set_window_pos("SortSim", 0, WINDOW_HEIGHT//6)
+            set_window_pos("SortSim", 0, WINDOW_HEIGHT//3)
 
         self.algorithms_host = AlgorithmHost()
-        self.step_sleep = 0.05
 
         self.initialize_plot()
         self.set_limits()        
@@ -39,33 +38,29 @@ class AlgorithmWindow:
     def update(self, new_data):
         if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
-            add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
+            add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
+            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete")
         else:
             add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
             add_bar_series("Algorithm", "highlight", new_data[1], [self.algorithms_host.data_y[x_value] for x_value in new_data[1]], weight=0.5)
+            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Step {self.algorithms_host.step_counter}")
             if (new_data[2]):
                 add_bar_series("Algorithm", "highlight-special", new_data[1], [self.algorithms_host.data_y[x_value] for x_value in new_data[1]], weight=0.5)
             else:
                 add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
 
-
     def new_dataset(self):
         self.algorithms_host.set_random_data()
         self.initialize_plot()
+
+    def set_speed(self, speed):
+        self.step_sleep = speed
 
     def next_step(self):
         value = self.algorithms_host.next_step()
         self.update(value)
         return value
 
-    def run_sim(self, sender, randomizebutton):
-        while get_value(sender):
-            i = self.next_step()
-            sleep(self.step_sleep)
-            configure_item(randomizebutton, enabled=False)
-            
-            if (not i):
-                set_value(sender, False)
-                break
-
-        configure_item(randomizebutton, enabled=True)
+    def change_algorithm(self, sender):
+        print(get_value(sender))
+        self.algorithms_host.set_algorithm(get_value(sender))
