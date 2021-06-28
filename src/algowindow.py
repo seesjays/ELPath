@@ -35,19 +35,32 @@ class AlgorithmWindow:
 
     # For now, just redraw everything, specific graph redraw can be slated for later
     # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
+    # 6/27/21 new_data structure as follows: [[red highlight x's], [green highlight x's]]
     def update(self, new_data):
+        print(new_data)
+        
+        
+
         if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
             set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete")
         else:
             add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
-            add_bar_series("Algorithm", "highlight", new_data[1], [self.algorithms_host.data_y[x_value] for x_value in new_data[1]], weight=0.5)
-            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Step {self.algorithms_host.step_counter}")
-            if (new_data[2]):
-                add_bar_series("Algorithm", "highlight-special", new_data[1], [self.algorithms_host.data_y[x_value] for x_value in new_data[1]], weight=0.5)
+
+            if new_data[0]:
+                x_highlight = new_data[0]
+                add_bar_series("Algorithm", "highlight", x_highlight, [self.algorithms_host.data_y[x_value] for x_value in x_highlight], weight=0.5)
+            else:
+                add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
+
+            if new_data[1]:
+                x_highlight_special = new_data[1]
+                add_bar_series("Algorithm", "highlight-special", x_highlight_special, [self.algorithms_host.data_y[x_value] for x_value in x_highlight_special], weight=0.5)
             else:
                 add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
+
+            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Step {self.algorithms_host.step_counter}")
 
     def new_dataset(self):
         self.algorithms_host.set_random_data()

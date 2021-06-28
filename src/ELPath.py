@@ -76,7 +76,8 @@ class ELPath():
         while get_value(sender):
             i = self.algorithms.next_step()
             sleep(get_value("step_sleep_slider")/100)
-
+            
+            configure_item("algorithm_combobox", enabled=False)
             configure_item("randomize_button", enabled=False)
             configure_item("next_step_button", enabled=False)
             
@@ -84,6 +85,7 @@ class ELPath():
                 set_value(sender, False)
                 break
 
+        configure_item("algorithm_combobox", enabled=True)
         configure_item("randomize_button", enabled=True)
         configure_item("next_step_button", enabled=True)
         

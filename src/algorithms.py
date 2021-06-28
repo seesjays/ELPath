@@ -5,8 +5,27 @@ def bubble(data):
     for i in range(n-1):
         for j in range(0, n-i-1):
             if data[j] > data[j + 1]:
-                yield [data, [j, j+1], False]
+                yield [[j, j+1], []]
                 data[j], data[j + 1] = data[j + 1], data[j]
-                yield [data, [j, j+1], True]
+                yield [[], [j, j+1]]
             else:
-                yield [data, [j, j+1], True]
+                yield [[], [j, j+1]]
+
+def insertion(data):
+    for i in range(1, len(data)):
+        key = data[i]
+        j = i - 1
+        yield[[j, j+1], []]
+        selected = False
+        while j >= 0 and data[j] > key:
+            if not selected:
+                yield[[], [j, j+1]]
+            yield[[j, j+1], []]
+            data[j+1] = data[j]
+            yield[[], [j, j+1]]
+            j -= 1
+            selected = True
+        yield[[j+1], []]
+        data[j + 1] = key
+        yield[[], [j+1]]
+        
