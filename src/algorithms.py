@@ -15,11 +15,11 @@ def insertion(data):
     for i in range(1, len(data)):
         key = data[i]
         j = i - 1
-        yield[[j, j+1], []]
+        yield[[], [i]]
         selected = False
         while j >= 0 and data[j] > key:
             if not selected:
-                yield[[], [j, j+1]]
+                yield[[i], []]
             yield[[j, j+1], []]
             data[j+1] = data[j]
             yield[[], [j, j+1]]
