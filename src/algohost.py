@@ -9,7 +9,8 @@ class AlgorithmHost:
         self.step_counter = 0
 
         self.data_x = [i for i in range(self.data_set_size)]
-        self.data_original = self.data_y = []
+        self.data_original = []
+        self.data_y = []
 
         self.alg_name = "Bubble Sort"
         self.alg_list = {
@@ -29,12 +30,13 @@ class AlgorithmHost:
 
     def set_random_data(self):
         self.step_counter = 0
-        self.data_original = self.data_y = [randint(1, self.data_set_size) for i in range(self.data_set_size)]
+        self.data_y = [randint(1, self.data_set_size) for i in range(self.data_set_size)]
+        self.data_original = self.data_y.copy()
         self.current_algorithm = self.alg_list[self.alg_name](self.data_y)
 
     def reset_data(self):
         self.step_counter = 0
-        self.data_y = self.data_original
+        self.data_y = self.data_original.copy()
         self.current_algorithm = self.alg_list[self.alg_name](self.data_y)
 
     def next_step(self):
@@ -42,4 +44,5 @@ class AlgorithmHost:
             self.step_counter += 1
             return next(self.current_algorithm)
         except StopIteration:
+            self.step_counter -= 1
             return False

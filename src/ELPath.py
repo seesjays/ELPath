@@ -69,10 +69,10 @@ class ELPath():
         add_slider_int("step_sleep_slider", label="", parent="Main Controls", width=400, default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
         
         add_spacing(parent="Main Controls", count=5)
-        
-        add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
+
+        add_button("original_data_button", label="Original Data", parent="Main Controls", callback=self.callbacks["original"])        
         add_same_line(parent="Main Controls")
-        add_button("original_data_button", label="Original Data", parent="Main Controls", callback=self.callbacks["original"])
+        add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
 
 
     def run_sim(self, sender):
@@ -81,6 +81,7 @@ class ELPath():
             sleep(get_value("step_sleep_slider")/100)
             
             configure_item("algorithm_combobox", enabled=False)
+            configure_item("original_data_button", enabled=False)
             configure_item("randomize_button", enabled=False)
             configure_item("next_step_button", enabled=False)
             
@@ -89,6 +90,7 @@ class ELPath():
                 break
 
         configure_item("algorithm_combobox", enabled=True)
+        configure_item("original_data_button", enabled=True)
         configure_item("randomize_button", enabled=True)
         configure_item("next_step_button", enabled=True)
         

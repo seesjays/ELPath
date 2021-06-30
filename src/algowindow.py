@@ -38,11 +38,10 @@ class AlgorithmWindow:
     # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
     # 6/27/21 new_data structure as follows: [[red highlight x's], [green highlight x's]]
     def update(self, new_data):
-        print(new_data)
         if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
-            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete")
+            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps.")
         else:
             add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
 
@@ -74,7 +73,8 @@ class AlgorithmWindow:
 
     def change_algorithm(self, sender):
         self.algorithms_host.set_algorithm(get_value(sender))
-
+        self.original_data()
+        
     def original_data(self):
         self.algorithms_host.reset_data()
         self.initialize_plot()
