@@ -23,6 +23,7 @@ class ELPath():
         self.algorithms = AlgorithmWindow()
         self.callbacks = {
             "next_step": self.algorithms.next_step,
+            "original": self.algorithms.original_data,
             "run_sim": self.run_sim,
             "randomize": self.algorithms.new_dataset,
             "set_algorithm": self.algorithms.change_algorithm
@@ -70,6 +71,8 @@ class ELPath():
         add_spacing(parent="Main Controls", count=5)
         
         add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
+        add_same_line(parent="Main Controls")
+        add_button("original_data_button", label="Original Data", parent="Main Controls", callback=self.callbacks["original"])
 
 
     def run_sim(self, sender):

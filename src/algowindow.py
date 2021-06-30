@@ -28,6 +28,7 @@ class AlgorithmWindow:
         set_plot_ylimits("Algorithm", 0, YLimit)
 
     def initialize_plot(self):
+        set_item_label("Algorithm", f"{self.algorithms_host.alg_name}")
         add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
         # clear other series
         add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
@@ -38,9 +39,6 @@ class AlgorithmWindow:
     # 6/27/21 new_data structure as follows: [[red highlight x's], [green highlight x's]]
     def update(self, new_data):
         print(new_data)
-        
-        
-
         if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
@@ -65,7 +63,7 @@ class AlgorithmWindow:
     def new_dataset(self):
         self.algorithms_host.set_random_data()
         self.initialize_plot()
-
+        
     def set_speed(self, speed):
         self.step_sleep = speed
 
@@ -75,5 +73,8 @@ class AlgorithmWindow:
         return value
 
     def change_algorithm(self, sender):
-        print(get_value(sender))
         self.algorithms_host.set_algorithm(get_value(sender))
+
+    def original_data(self):
+        self.algorithms_host.reset_data()
+        self.initialize_plot()
