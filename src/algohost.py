@@ -1,4 +1,4 @@
-from algorithms import bubble, insertion
+import algorithms as algs
 from random import randint
 from time import sleep
 
@@ -14,8 +14,8 @@ class AlgorithmHost:
 
         self.alg_name = "Bubble Sort"
         self.alg_list = {
-            "Bubble Sort": (lambda dataset: bubble(self.data_y)),
-            "Insertion Sort": (lambda dataset: insertion(self.data_y)),
+            "Bubble Sort": (lambda dataset: algs.bubble(self.data_y)),
+            "Insertion Sort": (lambda dataset: algs.insertion(self.data_y)),
         }
 
         self.current_algorithm = self.alg_list["Bubble Sort"]

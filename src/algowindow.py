@@ -36,7 +36,7 @@ class AlgorithmWindow:
 
     # For now, just redraw everything, specific graph redraw can be slated for later
     # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
-    # 6/27/21 new_data structure as follows: [[red highlight x's], [green highlight x's]]
+    # 6/30/21 new_data structure as follows: [[red highlight x's], [green highlight x's], "step_desc"]
     def update(self, new_data):
         if (not new_data):
             add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
@@ -57,7 +57,7 @@ class AlgorithmWindow:
             else:
                 add_bar_series("Algorithm", "highlight-special", [0], [0], weight=0.5)
 
-            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Step {self.algorithms_host.step_counter}")
+            set_item_label("Algorithm", f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data[2]}")
 
     def new_dataset(self):
         self.algorithms_host.set_random_data()
