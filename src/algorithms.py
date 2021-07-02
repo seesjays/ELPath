@@ -11,6 +11,41 @@ def bubble(data):
             else:
                 yield [[], [j, j+1],"Searching for unsorted pair"]
 
+def cocktail(data):
+    swapped = True
+    while swapped:
+        yield [[], [], "Moving through the data from beginning to end"]
+        swapped = False
+        for i in range(0, len(data)-2):
+            if data[i] > data[i+1]:
+                yield [[i, i+1], [], "Left bar is greater than right"]
+                tmp = data[i+1]
+                data[i+1] = data[i]
+                data[i] = tmp
+                swapped = True
+                yield [[], [i, i+1], "Swapped bars"]
+            else:
+                yield [[], [i, i+1], "Bars already ordered"]
+
+        if not swapped:
+            break
+        
+        yield [[], [], "Moving from end to beginning now"]
+        
+        swapped = False
+        for i in range(len(data)-2, 0, -1):
+            if data[i] > data[i+1]:
+                yield [[i, i+1], [], "Left bar is greater than right"]
+                tmp = data[i+1]
+                data[i+1] = data[i]
+                data[i] = tmp
+                swapped = True
+                yield [[], [i, i+1], "Swapped bars"]
+            else:
+                yield [[], [i, i+1], "Bars already ordered"]
+
+    yield
+
 def insertion(data):
     for i in range(1, len(data)):
         key = data[i]
@@ -20,9 +55,9 @@ def insertion(data):
         while j >= 0 and data[j] > key:
             if not selected:
                 yield[[i], [], "Bar before this is greater, saving the smaller bar"]
-            yield[[j, j+1], [], "Moving everything forward: replacing rightmost bar with left one"]
+            yield[[j, j+1], [], "Moving the left bar forward"]
             data[j+1] = data[j]
-            yield[[], [j, j+1], "Moving everything forward: Replacement complete"]
+            yield[[], [j, j+1], "Moved the left bar forward"]
             j -= 1
             selected = True
         yield[[j+1], [], "Replacing this bar with the smaller one from earlier"]

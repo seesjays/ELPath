@@ -16,6 +16,7 @@ class AlgorithmHost:
         self.alg_list = {
             "Bubble Sort": (lambda dataset: algs.bubble(self.data_y)),
             "Insertion Sort": (lambda dataset: algs.insertion(self.data_y)),
+            "Cocktail Sort": (lambda dataset: algs.cocktail(self.data_y)),
         }
 
         self.current_algorithm = self.alg_list["Bubble Sort"]
