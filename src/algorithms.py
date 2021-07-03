@@ -6,17 +6,17 @@ def bubble(data):
         for j in range(0, n-i-1):
             if data[j] > data[j + 1]:
                 yield {
-                    "red": [j, j+1],
+                    "highlight": [j, j+1],
                     "message": "Unsorted pair found"
                 }
                 data[j], data[j + 1] = data[j + 1], data[j]
                 yield {
-                    "green": [j, j+1],
+                    "highlight-special": [j, j+1],
                     "message": "Unsorted pair swapped"
                 }
             else:
                 yield {
-                    "green": [j, j+1],
+                    "highlight-special": [j, j+1],
                     "message": "Searching for unsorted pair"
                 }
                 
@@ -26,20 +26,36 @@ def selection(data):
     for i in range(data_length):
         #assume min is firt el
         j_min = i
-        yield [[], [j_min], "Moving forward, assuming this is the minimum"]
+        yield {
+                    "selected": [j_min],
+                    "message": "New minimum found"
+        }
 
         for j in range(i+1, data_length):
             if data[j] < data[j_min]:
                 # new min
                 j_min = j
-                yield [[j_min], [], "New minimum found"]
+                yield {
+                    "selected": [j_min],
+                    "message": "New minimum found"
+                }
             else:
-                yield [[j_min], [j], "Searching for new minimum"]
+                yield {
+                    "selected": [j_min],
+                    "highlight-special": [j],
+                    "message": "Searching for newer minimum"
+                }
 
         if j_min != i:
-            yield [[j_min, i], [], "Replacing the left bar with the new minimum"]
+            yield {
+                    "highlight": [j_min, i],
+                    "message": "Swapping the left bar with the newest minimum"
+            }
             data[i], data[j_min] = data[j_min], data[i]
-            yield [[], [j_min, i], "Replacement complete"]
+            yield {
+                    "highlight-special": [j_min, i],
+                    "message": "Swap complete"
+            }
 
 
 def merge(data):

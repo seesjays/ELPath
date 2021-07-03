@@ -52,6 +52,7 @@ class AlgorithmWindow:
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
             set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps.")
         else:
+            clear_plot("Algorithm")
             add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
 
             for highlight in new_data:
