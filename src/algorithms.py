@@ -17,7 +17,7 @@ def bubble(data):
             else:
                 yield {
                     "highlight-special": [j, j+1],
-                    "message": "Searching for unsorted pair"
+                    "message": "Pair already sorted"
                 }
                 
 def selection(data):
@@ -27,8 +27,8 @@ def selection(data):
         #assume min is firt el
         j_min = i
         yield {
-                    "selected": [j_min],
-                    "message": "New minimum found"
+            "selected": [j_min],
+            "message": "New minimum found"
         }
 
         for j in range(i+1, data_length):
@@ -43,97 +43,151 @@ def selection(data):
                 yield {
                     "selected": [j_min],
                     "highlight-special": [j],
-                    "message": "Searching for newer minimum"
+                    "message": "Searching for lower minimum"
                 }
 
         if j_min != i:
             yield {
-                    "highlight": [j_min, i],
-                    "message": "Swapping the left bar with the newest minimum"
+                "highlight": [j_min, i],
+                "message": "Swapping the left bar with the lowest minimum"
             }
             data[i], data[j_min] = data[j_min], data[i]
             yield {
-                    "highlight-special": [j_min, i],
-                    "message": "Swap complete"
+                "highlight-special": [j_min, i],
+                "message": "Swap complete"
             }
 
+#/questions/62993954/how-do-i-make-this-merge-sort-function-a-generator-python
+def merge(arr):
+    # arr is a unique list that all levels in the recursion tree can access:
 
-def merge(data):
-    if len(data) > 1:
-         # Finding the midpoint of the array
-        mid = len(data)//2
- 
-        # Dividing the array elements
-        L = data[:mid]
- 
-        # into 2 halves
-        R = data[mid:]
+    def merge_rec(start, end):  # separate function that can take start/end indices
+        if end - start > 1:
+            middle = (start + end) // 2
 
-        # Sorting the first half
-        yield from merge(L)
- 
-        # Sorting the second half
-        yield from merge(R)
- 
-        i = j = k = 0
- 
-        # Copy data to temp arrays L[] and R[]
-        while i < len(L) and j < len(R):
-            yield [[i, j], [k], ""]
-            if L[i] < R[j]:
-                data[k] = L[i]
-                i += 1
-                yield [[], [i, j, k], ""]
-            else:
-                data[k] = R[j]
-                j += 1
-                yield [[], [i, j, k], ""]
-            k += 1
- 
-        # Checking if any element was left
-        while i < len(L):
-            yield [[i, k], [], ""]
-            data[k] = L[i]
-            yield [[i], [k], ""]
-            i += 1
-            k += 1
- 
-        while j < len(R):
-            yield [[j, k], [], ""]
-            data[k] = R[j]
-            yield [[j], [k], ""]
-            j += 1
-            k += 1
+            yield from merge_rec(start, middle)  # don't provide slice, but index range
+            yield from merge_rec(middle, end)
+            left = arr[start:middle]
+            right  = arr[middle:end]
+
+            a = 0
+            b = 0
+            c = start
+
+            while a < len(left) and b < len(right):
+                if left[a] < right[b]:
+                    yield {
+                        "highlight": [c],
+                        "selected": [start, end-1],
+                        "message": "Sorting between yellow bars"
+                    }
+                    arr[c] = left[a]
+                    yield {
+                        "highlight-special": [c],
+                        "selected": [start, end-1],
+                        "message": "Sorting between yellow bars"
+                    }
+                    a += 1
+                else:
+                    yield {
+                        "highlight": [c],
+                        "selected": [start, end-1],
+                        "message": "Sorting between yellow bars"
+                    }
+                    arr[c] = right[b]
+                    yield {
+                        "highlight-special": [c],
+                        "selected": [start, end-1],
+                        "message": "Sorting between yellow bars"
+                    }
+                    b += 1
+                c += 1
+
+            while a < len(left):
+                yield {
+                    "highlight": [c],
+                    "selected": [start, end-1],
+                    "message": "Adding leftover from left temp array"
+                }
+                arr[c] = left[a]
+                yield {
+                    "highlight-special": [c],
+                    "selected": [start, end-1],
+                    "message": "Add complete"
+                }
+                a += 1
+                c += 1
+
+            while b < len(right):
+                yield {
+                    "highlight": [c],
+                    "selected": [start, end-1],
+                    "message": "Adding leftover from right temp array"
+                }
+                arr[c] = right[b]
+                yield {
+                    "highlight-special": [c],
+                    "selected": [start, end-1],
+                    "message": "Add complete"
+                }
+                b += 1
+                c += 1
+            print(arr, start, end)
+
+    yield from merge_rec(0, len(arr))  # call inner function with start/end arguments
+
 
 
 def cocktail(data):
     swapped = True
     while swapped:
-        yield [[], [], "Moving through the data from beginning to end"]
+        yield {
+            "message": "Moving through the data from beginning to end"
+        }
         swapped = False
         for i in range(0, len(data)-2):
             if data[i] > data[i+1]:
-                yield [[i, i+1], [], "Left bar is greater than right"]
+                yield {
+                    "highlight": [i, i+1],
+                    "message": "Left bar is greater than right"
+                }
                 data[i], data[i+1] = data[i+1], data[i]
                 swapped = True
-                yield [[], [i, i+1], "Swapped bars"]
+                yield {
+                    "highlight-special": [i, i+1],
+                    "message": "Swapped bars"
+                }
             else:
-                yield [[], [i, i+1], "Bars already ordered"]
+                yield {
+                    "selected": [i, i+1],
+                    "message": "Bars already ordered"
+                }
 
         if not swapped:
             break
-        
-        yield [[], [], "Moving from end to beginning now"]
+
+        yield {
+            "message": "Moving from end to beginning now"
+        }
         
         swapped = False
         for i in range(len(data)-2, 0, -1):
             if data[i] > data[i+1]:
-                yield [[i, i+1], [], "Left bar is greater than right"]
+                yield {
+                    "highlight": [i, i+1],
+                    "message": "Left bar is greater than right"
+                }
                 data[i], data[i+1] = data[i+1], data[i]
                 swapped = True
-                yield [[], [i, i+1], "Swapped bars"]
+                yield {
+                    "highlight-special": [i, i+1],
+                    "message": "Swapped bars"
+                }
             else:
-                yield [[], [i, i+1], "Bars already ordered"]
+                yield {
+                    "selected": [i, i+1],
+                    "message": "Bars already ordered"
+                }
 
     yield
 
@@ -141,17 +195,35 @@ def insertion(data):
     for i in range(1, len(data)):
         key = data[i]
         j = i - 1
-        yield[[], [i], "Checking bar before this one for a greater value"]
+        yield {
+            "selected": [i],
+            "message": "Checking bar before this one for a greater value"
+        }
         selected = False
         while j >= 0 and data[j] > key:
             if not selected:
-                yield[[i], [], "Bar before this is greater, saving the smaller bar"]
-            yield[[j, j+1], [], "Moving the left bar forward"]
+                yield {
+                    "highlight": [i],
+                    "message": "Bar before this is greater, saving the smaller bar"
+                }
+
+            yield {
+                "highlight": [j, j+1],
+                "message": "Moving the left bar forward"
+            }
             data[j+1] = data[j]
-            yield[[], [j, j+1], "Moved the left bar forward"]
+            yield {
+                "highlight-special": [j, j+1],
+                "message": "Move complete"
+            }
             j -= 1
             selected = True
-        yield[[j+1], [], "Replacing this bar with the smaller one from earlier"]
+        yield {
+            "selected": [j+1],
+            "message": "Replacing this bar with the smaller one from earlier"
+        }
         data[j + 1] = key
-        yield[[], [j+1], "Replacement complete"]
-
+        yield {
+            "highlight-special": [j+1],
+            "message": "Replacement complete"
+        }

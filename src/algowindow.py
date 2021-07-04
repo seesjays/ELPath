@@ -13,6 +13,8 @@ class AlgorithmWindow:
 
         self.algorithms_host = AlgorithmHost()
 
+        self.highlight_list = []
+
         self.initialize_plot()
         self.set_limits()        
 
@@ -46,16 +48,23 @@ class AlgorithmWindow:
         "message": "message to user"
     }
     """
+
     def update(self, new_data):
+        add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
+        
         if (not new_data):
-            clear_plot("Algorithm")
+            self.clear_highlights()
+            
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
             set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps.")
+        
         else:
-            clear_plot("Algorithm")
-            add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
-
+            self.clear_highlights()
             for highlight in new_data:
+                
+                if highlight not in self.highlight_list:
+                    self.highlight_list.append(highlight)
+
                 if (highlight != "message"):
                     add_bar_series("Algorithm", highlight, [0], [0], weight=0.5)
                     x_highlight = new_data[highlight]
@@ -63,7 +72,13 @@ class AlgorithmWindow:
 
             set_item_label("Algorithm", f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data['message']}")
 
+    def clear_highlights(self):
+        for highlight in self.highlight_list:
+            delete_series("Algorithm", highlight)
+        self.highlight_list.clear()
+            
     def new_dataset(self):
+        self.clear_highlights()
         self.algorithms_host.set_random_data()
         self.initialize_plot()
         
@@ -76,9 +91,11 @@ class AlgorithmWindow:
         return value
 
     def change_algorithm(self, sender):
+        self.clear_highlights()
         self.algorithms_host.set_algorithm(get_value(sender))
         self.original_data()
         
     def original_data(self):
+        self.clear_highlights()
         self.algorithms_host.reset_data()
         self.initialize_plot()
