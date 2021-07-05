@@ -58,7 +58,7 @@ def selection(data):
             }
 
 #/questions/62993954/how-do-i-make-this-merge-sort-function-a-generator-python
-def merge(arr):
+def merge(data):
     # arr is a unique list that all levels in the recursion tree can access:
 
     def merge_rec(start, end):  # separate function that can take start/end indices
@@ -67,8 +67,8 @@ def merge(arr):
 
             yield from merge_rec(start, middle)  # don't provide slice, but index range
             yield from merge_rec(middle, end)
-            left = arr[start:middle]
-            right  = arr[middle:end]
+            left = data[start:middle]
+            right  = data[middle:end]
 
             a = 0
             b = 0
@@ -81,7 +81,7 @@ def merge(arr):
                         "selected": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
-                    arr[c] = left[a]
+                    data[c] = left[a]
                     yield {
                         "highlight-special": [c],
                         "selected": [start, end-1],
@@ -94,7 +94,7 @@ def merge(arr):
                         "selected": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
-                    arr[c] = right[b]
+                    data[c] = right[b]
                     yield {
                         "highlight-special": [c],
                         "selected": [start, end-1],
@@ -109,7 +109,7 @@ def merge(arr):
                     "selected": [start, end-1],
                     "message": "Adding leftover from left temp array"
                 }
-                arr[c] = left[a]
+                data[c] = left[a]
                 yield {
                     "highlight-special": [c],
                     "selected": [start, end-1],
@@ -124,7 +124,7 @@ def merge(arr):
                     "selected": [start, end-1],
                     "message": "Adding leftover from right temp array"
                 }
-                arr[c] = right[b]
+                data[c] = right[b]
                 yield {
                     "highlight-special": [c],
                     "selected": [start, end-1],
@@ -132,11 +132,84 @@ def merge(arr):
                 }
                 b += 1
                 c += 1
-            print(arr, start, end)
+            print(data, start, end)
 
-    yield from merge_rec(0, len(arr))  # call inner function with start/end arguments
+    yield from merge_rec(0, len(data))  # call inner function with start/end arguments
 
+# The main function that implements QuickSort
+def quick_sort(start, end, array):
+    if (start < end):
+        ###
+        intstart = start
+        intend = end
+        # p is partitioning index, array[p]
+        # is at right place
+        # Initializing pivot's index to start
+        pivot_index = intstart
+        pivot = array[pivot_index]
 
+        # This loop runs till start pointer crosses
+        # end pointer, and when it does we swap the
+        # pivot with element on end pointer
+
+        while intstart < intend:
+
+            # Increment the start pointer till it finds an
+            # element greater than  pivot
+            while intstart < len(array) and array[intstart] <= pivot:
+                yield {
+                    "selected": [pivot_index],
+                    "searching": [intstart],
+                    "message": "Searching for element greater than the pivot(yellow)"
+                }
+                intstart += 1
+                yield {
+                    "selected": [pivot_index],
+                    "searching": [intstart],
+                    "message": "Searching for element greater than the pivot(yellow)"
+                }
+
+            # Decrement the end pointer till it finds an
+            # element less than pivot
+            while array[intend] > pivot:
+                yield {
+                    "selected": [pivot_index],
+                    "highlight": [intend],
+                    "message": "Quickening"
+                }
+                intend -= 1
+                yield {
+                    "selected": [pivot_index],
+                    "highlight": [intend],
+                    "message": "Quickening"
+                }
+
+            # If start and end have not crossed each other,
+            # swap the numbers on start and end
+            if(intstart < intend):
+                yield {
+                    "highlight": [intstart, intend],
+                    "message": "Swapping the start and end"
+                }
+                array[intstart], array[intend] = array[intend], array[intstart]
+                yield {
+                    "highlight-special": [intstart, intend],
+                    "message": "Swapping the start and end"
+                }
+
+        # Swap pivot element with element on end pointer.
+        # This puts pivot on its correct sorted place.
+        array[intend], array[pivot_index] = array[pivot_index], array[intend]
+
+        # Returning end pointer to divide the array into 2
+        p = intend
+        
+        
+        # Sort elements before partition
+        # and after partition
+        
+        yield from quick_sort(start, p - 1, array)
+        yield from quick_sort(p + 1, end, array)
 
 def cocktail(data):
     swapped = True

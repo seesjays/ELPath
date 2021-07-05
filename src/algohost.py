@@ -12,8 +12,9 @@ class AlgorithmHost:
         self.data_original = []
         self.data_y = []
 
-        self.alg_name = "Bubble Sort"
+        self.alg_name = "Quick Sort"
         self.alg_list = {
+            "Quick Sort": (lambda dataset: algs.quick_sort(0, self.data_set_size-1, self.data_y)),
             "Merge Sort": (lambda dataset: algs.merge(self.data_y)),
             "Bubble Sort": (lambda dataset: algs.bubble(self.data_y)),
             "Insertion Sort": (lambda dataset: algs.insertion(self.data_y)),
@@ -21,7 +22,7 @@ class AlgorithmHost:
             "Cocktail Sort": (lambda dataset: algs.cocktail(self.data_y)),
         }
 
-        self.current_algorithm = self.alg_list["Bubble Sort"]
+        self.current_algorithm = self.alg_list[self.alg_name]
 
         if not data_set:
             self.set_random_data()

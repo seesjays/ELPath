@@ -51,7 +51,7 @@ class ELPath():
         add_text("Algorithm:", parent="Main Controls")
         add_same_line(parent="Main Controls")
         add_combo("algorithm_combobox", label="", parent="Main Controls", 
-        default_value="Bubble Sort", 
+        default_value=self.algorithms.algorithms_host.alg_name, 
         items=tuple(self.algorithms.algorithms_host.alg_list.keys()), 
         callback=self.callbacks["set_algorithm"],
         width=400)

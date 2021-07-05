@@ -1,6 +1,8 @@
 from random import randint
 
-testvalset = [i for i in range(50)]
+
+
+testvalset = [randint(0, 50) for i in range(50)]
 
 def bubble(data):
     n = len(data)
@@ -126,6 +128,61 @@ def merge_sort(arr):
 
     yield from mergeSortRec(0, len(arr)) 
 
+     
+# The main function that implements QuickSort
+def quick_sort(start, end, array):
+     
+    if (start < end):
+        ###
+        intstart = start
+        intend = end
+        # p is partitioning index, array[p]
+        # is at right place
+        # Initializing pivot's index to start
+        pivot_index = intstart
+        pivot = array[pivot_index]
 
-for x in merge_sort(testvalset):
+        # This loop runs till start pointer crosses
+        # end pointer, and when it does we swap the
+        # pivot with element on end pointer
+        while intstart < intend:
+
+            # Increment the start pointer till it finds an
+            # element greater than  pivot
+            while intstart < len(array) and array[intstart] <= pivot:
+                intstart += 1
+
+            # Decrement the end pointer till it finds an
+            # element less than pivot
+            while array[intend] > pivot:
+                intend -= 1
+
+            # If start and end have not crossed each other,
+            # swap the numbers on start and end
+            if(intstart < intend):
+                array[intstart], array[intend] = array[intend], array[intstart]
+
+        # Swap pivot element with element on end pointer.
+        # This puts pivot on its correct sorted place.
+        array[intend], array[pivot_index] = array[pivot_index], array[intend]
+
+        # Returning end pointer to divide the array into 2
+        p = intend
+        yield p, array
+        # Sort elements before partition
+        # and after partition
+        yield from quick_sort(start, p - 1, array)
+        yield from quick_sort(p + 1, end, array)
+        
+print(testvalset)
+dar = testvalset.copy()
+dar.sort()
+print(dar)
+
+for x in quick_sort(0, len(testvalset)-1, testvalset):
     print(x)
+
+print(testvalset)
+if dar == testvalset:
+    print("sorted")
+    
