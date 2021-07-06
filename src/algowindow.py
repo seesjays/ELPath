@@ -74,9 +74,8 @@ class AlgorithmWindow:
 
     def clear_highlights(self):
         for highlight in self.highlight_list:
-            delete_series("Algorithm", highlight)
-        self.highlight_list.clear()
-            
+            add_bar_series("Algorithm", highlight, [0], [0], weight=0.5)
+                        
     def new_dataset(self):
         self.clear_highlights()
         self.algorithms_host.set_random_data()

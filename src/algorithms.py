@@ -1,4 +1,5 @@
 # Algorithms as generators!
+# A lot of these are lifted and modified from other locations, like SO and GfG.
 
 def bubble(data):
     n = len(data)
@@ -132,7 +133,6 @@ def merge(data):
                 }
                 b += 1
                 c += 1
-            print(data, start, end)
 
     yield from merge_rec(0, len(data))  # call inner function with start/end arguments
 
@@ -148,59 +148,74 @@ def quick_sort(start, end, array):
         pivot_index = intstart
         pivot = array[pivot_index]
 
+        yield {
+            "selected": [pivot_index],
+            "message": "New pivot point selected"
+        }
+
         # This loop runs till start pointer crosses
         # end pointer, and when it does we swap the
         # pivot with element on end pointer
 
         while intstart < intend:
+            lnth = len(array)
 
             # Increment the start pointer till it finds an
             # element greater than  pivot
-            while intstart < len(array) and array[intstart] <= pivot:
+            while intstart < lnth and array[intstart] <= pivot:
                 yield {
+                    "highlight": [intstart],
                     "selected": [pivot_index],
-                    "searching": [intstart],
-                    "message": "Searching for element greater than the pivot(yellow)"
+                    "message": "Searching for an element greater than the pivot"
                 }
                 intstart += 1
+
+            if intstart < lnth:
                 yield {
+                    "highlight-special": [intstart],
                     "selected": [pivot_index],
-                    "searching": [intstart],
-                    "message": "Searching for element greater than the pivot(yellow)"
+                    "message": "Found an element greater than the pivot"
                 }
 
             # Decrement the end pointer till it finds an
             # element less than pivot
             while array[intend] > pivot:
                 yield {
-                    "selected": [pivot_index],
                     "highlight": [intend],
-                    "message": "Quickening"
+                    "selected": [pivot_index],
+                    "message": "Searching for an element smaller than the pivot"
                 }
                 intend -= 1
-                yield {
-                    "selected": [pivot_index],
-                    "highlight": [intend],
-                    "message": "Quickening"
-                }
 
+            yield {
+                "highlight-special": [intend],
+                "selected": [pivot_index],
+                "message": "Found an element smaller than the pivot"
+            }
             # If start and end have not crossed each other,
             # swap the numbers on start and end
             if(intstart < intend):
                 yield {
                     "highlight": [intstart, intend],
-                    "message": "Swapping the start and end"
+                    "message": "Swapping the smaller and greater"
                 }
                 array[intstart], array[intend] = array[intend], array[intstart]
                 yield {
                     "highlight-special": [intstart, intend],
-                    "message": "Swapping the start and end"
+                    "message": "Swap complete"
                 }
 
         # Swap pivot element with element on end pointer.
         # This puts pivot on its correct sorted place.
+        yield {
+            "highlight": [intend, pivot_index],
+            "message": "Placing pivot where the last smaller element was"
+        }
         array[intend], array[pivot_index] = array[pivot_index], array[intend]
-
+        yield {
+            "highlight-special": [intend, pivot_index],
+            "message": "Pivot placed"
+        }
         # Returning end pointer to divide the array into 2
         p = intend
         
