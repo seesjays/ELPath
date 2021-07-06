@@ -1,6 +1,5 @@
 # ELPath
-An algorithm simulator.
+An algorithm visualizer.
 
-ELPath is lovingly built using DearPyGui as a basis to its GUI and plotting functions.
-I aim to practice implementing sorting and pathfinding algorithms, as well as broaden my Python experience.
-
+ELPath is lovingly built using DearPyGui as a basis for its GUI and plotting functions.
+This is aimed at providing understandable visualizations of common sorting and (eventually) pathfinding algorithms.
