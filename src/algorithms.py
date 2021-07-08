@@ -197,11 +197,13 @@ def quick_sort(start, end, array):
             if(intstart < intend):
                 yield {
                     "highlight": [intstart, intend],
-                    "message": "Swapping the smaller and greater"
+                    "selected": [pivot_index],
+                    "message": "Swapping the smaller and greater elements"
                 }
                 array[intstart], array[intend] = array[intend], array[intstart]
                 yield {
                     "highlight-special": [intstart, intend],
+                    "selected": [pivot_index],
                     "message": "Swap complete"
                 }
 

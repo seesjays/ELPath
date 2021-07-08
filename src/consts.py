@@ -1,13 +1,13 @@
-# For maximum compat (and because I don't see any real reason not to,) the window is designed to fit in smaller screens (laptops, etc)
 WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 900
 FILL_WIDTH = WINDOW_WIDTH-15
+SIDEBAR_WIDTH = 350
 
-CHILD_WINDOW_FILL_PARAMS = {
-    "width": FILL_WIDTH, 
+CHILD_WINDOW_FILL_PARAMS = { 
     "no_resize": True, 
     "no_collapse": True, 
     "no_close": True, 
-    "no_move": True
+    "no_move": True,
+    "no_title_bar": True
 }
 
 UNINTERACTIVE_GRAPH_PARAMS= {

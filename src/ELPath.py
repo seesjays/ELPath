@@ -3,19 +3,7 @@ from dearpygui.core import *
 from dearpygui.simple import *
 from algohost import AlgorithmHost
 from algowindow import AlgorithmWindow
-
-# For maximum compat (and because I don't see any real reason not to,) the window is designed to fit in smaller screens (laptops, etc)
-WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 900
-FILL_WIDTH = WINDOW_WIDTH-15
-VAL_CNT = 20
-
-CHILD_WINDOW_FILL_PARAMS = {
-    "width": FILL_WIDTH, 
-    "no_resize": True, 
-    "no_collapse": True, 
-    "no_close": True, 
-    "no_move": True
-}
+import consts as cnsts
 
 class ELPath():
     def __init__(self):
@@ -34,45 +22,45 @@ class ELPath():
 
     def __initialize_window(self):
         # Window settings
-        set_global_font_scale(1.5);
+        set_global_font_scale(1.2);
         set_theme("Dark Grey")
-        set_main_window_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        set_style_window_padding(10, 10)
+        set_main_window_size(cnsts.WINDOW_WIDTH, cnsts.WINDOW_HEIGHT)
         add_additional_font("resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20)
 
-        with window("ELPath", width=880, height=880):
-            set_window_pos("ELPath", 0, 0)
+        with window("ELPath", width=1200, height=700):
+            pass
+        with window("SortSim", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
+            set_window_pos("SortSim", cnsts.SIDEBAR_WIDTH, 25)
+            set_style_window_border_size(0)
+            add_plot("Algorithm", height=790, width=790,  **cnsts.UNINTERACTIVE_GRAPH_PARAMS)
+            self.algorithms.initialize_plot()
 
-        with window("Main Controls", x_pos=0, y_pos=0, height=WINDOW_HEIGHT//3, **CHILD_WINDOW_FILL_PARAMS): # hardcoded for now, since we only have bubble sort haha
-            add_spacing(count=5, name="spacing1")
-
+            
     def __link_controls(self):
         # Have to use a list for callback_data because for some reason, passing in a function reference as the data runs said function 
-        add_text("Algorithm:", parent="Main Controls")
-        add_same_line(parent="Main Controls")
-        add_combo("algorithm_combobox", label="", parent="Main Controls", 
+        add_text("Algorithm:", parent="ELPath")
+        add_combo("algorithm_combobox", label="", parent="ELPath", 
         default_value=self.algorithms.algorithms_host.alg_name, 
         items=tuple(self.algorithms.algorithms_host.alg_list.keys()), 
         callback=self.callbacks["set_algorithm"],
-        width=400)
+        width=300)
         
-        add_spacing(parent="Main Controls", count=5)
+        add_spacing(parent="ELPath", count=5)
         
-        add_checkbox("run_sim_checkbox", label="Run Simulation", parent="Main Controls", callback=self.callbacks["run_sim"])
-        add_same_line(parent="Main Controls")
-        add_button("next_step_button", label="Next Step", parent="Main Controls", callback=self.callbacks["next_step"])
+        add_checkbox("run_sim_checkbox", label="Run", parent="ELPath", callback=self.callbacks["run_sim"])
+        add_same_line(parent="ELPath")
+        add_button("next_step_button", label="Next Step", parent="ELPath", callback=self.callbacks["next_step"])
         
-        add_spacing(parent="Main Controls", count=5)
+        add_spacing(parent="ELPath", count=5)
 
-        add_text("Time:", parent="Main Controls")
-        add_same_line(parent="Main Controls")
-        add_slider_int("step_sleep_slider", label="", parent="Main Controls", width=400, default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
+        add_text("Speed:", parent="ELPath")
+        add_slider_int("step_sleep_slider", label="", parent="ELPath", width=300, default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
         
-        add_spacing(parent="Main Controls", count=5)
+        add_spacing(parent="ELPath", count=5)
 
-        add_button("original_data_button", label="Original Data", parent="Main Controls", callback=self.callbacks["original"])        
-        add_same_line(parent="Main Controls")
-        add_button("randomize_button", label="Randomize Data", parent="Main Controls", callback=self.callbacks["randomize"])
+        add_text("Data:", parent="ELPath")
+        add_button("original_data_button", label="Original Data", parent="ELPath", callback=self.callbacks["original"])        
+        add_button("randomize_button", label="Randomize Data", parent="ELPath", callback=self.callbacks["randomize"])
 
 
     def run_sim(self, sender):
