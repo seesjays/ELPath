@@ -28,7 +28,7 @@ class ELPath():
         add_additional_font("resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20)
 
         with window("ELPath", width=1200, height=700):
-            pass
+            window
         with window("SortSim", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("SortSim", cnsts.SIDEBAR_WIDTH, 25)
             set_style_window_border_size(0)
@@ -66,6 +66,8 @@ class ELPath():
     def run_sim(self, sender):
         while get_value(sender):
             i = self.algorithms.next_step()
+            m = self.algorithms.message
+            
             sleep(get_value("step_sleep_slider")/100)
             
             configure_item("algorithm_combobox", enabled=False)
