@@ -28,7 +28,10 @@ class ELPath():
         add_additional_font("resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20)
 
         with window("ELPath", width=1200, height=700):
-            window
+            pass
+        with window("Info", width=cnsts.SIDEBAR_WIDTH-5, height=800, **cnsts.CHILD_WINDOW_FILL_PARAMS):
+            set_window_pos("Info", 5, 350)
+            pass
         with window("SortSim", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("SortSim", cnsts.SIDEBAR_WIDTH, 25)
             set_style_window_border_size(0)
