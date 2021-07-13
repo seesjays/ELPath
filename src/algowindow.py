@@ -8,6 +8,7 @@ from time import sleep
 class AlgorithmWindow:
     def __init__(self):
         self.algorithms_host = AlgorithmHost()
+        self.message = self.algorithms_host.alg_name
 
         self.highlight_list = []
 
@@ -51,8 +52,8 @@ class AlgorithmWindow:
             self.clear_highlights()
             
             add_bar_series("Algorithm", "highlight-special", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
-            set_item_label("Algorithm", f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps.")
-        
+            self.message = f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps."
+                    
         else:
             self.clear_highlights()
             for highlight in new_data:

@@ -31,6 +31,7 @@ class ELPath():
             pass
         with window("Info", width=cnsts.SIDEBAR_WIDTH-5, height=800, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("Info", 5, 350)
+            add_text("dar")
             pass
         with window("SortSim", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("SortSim", cnsts.SIDEBAR_WIDTH, 25)
@@ -65,11 +66,15 @@ class ELPath():
         add_button("original_data_button", label="Original Data", parent="ELPath", callback=self.callbacks["original"])        
         add_button("randomize_button", label="Randomize Data", parent="ELPath", callback=self.callbacks["randomize"])
 
+    def update_info(self, message):
+        set_value("dar", message)
 
     def run_sim(self, sender):
         while get_value(sender):
             i = self.algorithms.next_step()
             m = self.algorithms.message
+            self.update_info(m)
+
             
             sleep(get_value("step_sleep_slider")/100)
             
