@@ -25,6 +25,7 @@ class AlgorithmWindow:
 
     def initialize_plot(self):
         set_item_label("Algorithm", f"{self.algorithms_host.alg_name}")
+        self.message = f"{self.algorithms_host.alg_name}"
         add_bar_series("Algorithm", "data", self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
         # clear other series
         add_bar_series("Algorithm", "highlight", [0], [0], weight=0.5)
@@ -66,7 +67,8 @@ class AlgorithmWindow:
                     x_highlight = new_data[highlight]
                     add_bar_series("Algorithm", highlight, x_highlight, [self.algorithms_host.data_y[x_value] for x_value in x_highlight], weight=0.5)
 
-            set_item_label("Algorithm", f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data['message']}")
+            self.message = f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data['message']}"
+
 
     def clear_highlights(self):
         for highlight in self.highlight_list:

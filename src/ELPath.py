@@ -31,7 +31,9 @@ class ELPath():
             pass
         with window("Info", width=cnsts.SIDEBAR_WIDTH-5, height=800, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("Info", 5, 350)
-            add_text("dar")
+            add_text("Info:", wrap=300)
+            add_text("alginfo", wrap=300)
+            set_value("alginfo", "")
             pass
         with window("SortSim", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("SortSim", cnsts.SIDEBAR_WIDTH, 25)
@@ -67,7 +69,7 @@ class ELPath():
         add_button("randomize_button", label="Randomize Data", parent="ELPath", callback=self.callbacks["randomize"])
 
     def update_info(self, message):
-        set_value("dar", message)
+        set_value("alginfo", f"{message}")
 
     def run_sim(self, sender):
         while get_value(sender):
