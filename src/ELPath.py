@@ -42,7 +42,6 @@ class ELPath():
             add_plot("Algorithm", height=790, width=790,
                      **cnsts.UNINTERACTIVE_GRAPH_PARAMS)
             self.algorithms.initialize_plot()
-            self.algorithms.switch_mode()
 
     def update_info(self, func):
         def wrapper():
