@@ -1,6 +1,7 @@
 from dearpygui.core import *
 from dearpygui.simple import *
 from algohost import AlgorithmHost
+from pathfindhost import PathfindingHost
 import consts as cnsts
 from random import randint
 from time import sleep
@@ -87,12 +88,18 @@ class AlgorithmWindow:
         self.update(value)
         return value
 
-    def change_algorithm(self, sender):
+    def change_algorithm(self):
         self.clear_highlights()
-        self.algorithms_host.set_algorithm(get_value(sender))
+        self.algorithms_host.set_algorithm(get_value("algorithm_combobox"))
         self.original_data()
         
     def original_data(self):
         self.clear_highlights()
         self.algorithms_host.reset_data()
         self.initialize_plot()
+
+    # Pathfinding
+
+    def switch_mode(self):
+        self.algorithms_host = PathfindingHost()
+        delete_item("Algorithm")
