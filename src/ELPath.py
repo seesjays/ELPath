@@ -4,12 +4,14 @@ from dearpygui.simple import *
 from algohost import AlgorithmHost
 from algowindow import AlgorithmWindow
 import consts as cnsts
+from pathingwindow import PathingWindow
 
 
 class ELPath():
     def __init__(self):
         self.step_sleep = 5
         self.algorithms = AlgorithmWindow()
+        self.pathing = PathingWindow()
         self.callbacks = {
             "next_step": self.update_info(self.algorithms.next_step),
             "original": self.update_info(self.algorithms.original_data),
@@ -18,7 +20,7 @@ class ELPath():
             "set_algorithm": self.update_info(self.algorithms.change_algorithm)
         }
         self.__initialize_window()
-        self.__link_controls()
+        #self.__link_controls()
 
     def __initialize_window(self):
         # Window settings
@@ -36,12 +38,10 @@ class ELPath():
             add_text("alginfo", wrap=300)
             set_value("alginfo", "")
             pass
-        with window("Simulation", height=800, width=800, no_scrollbar=True, **cnsts.CHILD_WINDOW_FILL_PARAMS):
-            set_window_pos("Simulation", cnsts.SIDEBAR_WIDTH, 25)
+        with window("Simulation", height=800, width=800, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=25, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_style_window_border_size(0)
-            add_plot("Algorithm", height=790, width=790,
-                     **cnsts.UNINTERACTIVE_GRAPH_PARAMS)
-            self.algorithms.initialize_plot()
+            self.pathing.initialize_grid()
+            #self.algorithms.reset_plot()
 
     def update_info(self, func):
         def wrapper():
