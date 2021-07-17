@@ -13,7 +13,9 @@ class PathingWindow:
     def initialize_grid(self):
         grid_name = "Pathfinding_Grid"
         add_drawing(grid_name, parent="Simulation", width=800, height=800)
-        draw_line(grid_name, [10, 10], [100, 100], [255, 0, 0, 255], 1)
+        for i in range(20):
+            for j in range(20):
+                draw_rectangle(grid_name, [i, j], [(i+1)*20, (j+1)*20], [255, 255, 255, 255], fill=[255, 255, 255, 255], rounding=5)
         #self.message = f"{self.pathing_host.alg_name}"
 
     def update(self, new_data):
