@@ -5,18 +5,36 @@ import consts as cnsts
 from random import randint
 from time import sleep
 
+
 class PathingWindow:
     def __init__(self):
         self.pathing_host = PathfindingHost()
         #self.message = self.pathing_host.alg_name
 
     def initialize_grid(self):
-        grid_name = "Pathfinding_Grid"
-        add_drawing(grid_name, parent="Simulation", width=800, height=800)
-        for i in range(20):
-            for j in range(20):
-                draw_rectangle(grid_name, [i, j], [(i+1)*20, (j+1)*20], [255, 255, 255, 255], fill=[255, 255, 255, 255], rounding=5)
+        window_size = 800
+        side_cell_count = 20
+        cell_size = window_size/side_cell_count
+        set_mouse_click_callback(self.get_clicked_cell)
+        
+        for i in range(side_cell_count):
+            for j in range(side_cell_count):
+                draw_rectangle("Simulation", [i*cell_size+10, j*cell_size], [(i+1)*cell_size+10, (j+1)*cell_size], [
+                               34, 36, 37, 255], fill=[255, 255, 255, 255], rounding=2, thickness=1)
         #self.message = f"{self.pathing_host.alg_name}"
+
+
+    def get_clicked_cell(self):
+        pos = get_mouse_pos()
+        left_bound_adjusted_x = pos[0]-10
+        top_bound_adjusted_y = pos[1]+30
+
+        min_x = 0
+        min_y = 0
+        max_x = 810
+        max_y = 770
+        
+        print((left_bound_adjusted_x, top_bound_adjusted_y))
 
     def update(self, new_data):
         pass

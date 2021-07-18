@@ -30,7 +30,7 @@ class ELPath():
         add_additional_font(
             "resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20)
 
-        with window("ELPath", width=1200, height=700):
+        with window("ELPath", width=1200, height=1000):
             pass
         with window("Info", width=cnsts.SIDEBAR_WIDTH-5, height=800, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_window_pos("Info", 5, 350)
@@ -38,10 +38,12 @@ class ELPath():
             add_text("alginfo", wrap=300)
             set_value("alginfo", "")
             pass
-        with window("Simulation", height=800, width=800, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=25, **cnsts.CHILD_WINDOW_FILL_PARAMS):
+        with window("Simulation", height=825, width=825, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=30, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             set_style_window_border_size(0)
             self.pathing.initialize_grid()
+            #self.algorithms.initialize_plot()
             #self.algorithms.reset_plot()
+            #self.__link_controls()
 
     def update_info(self, func):
         def wrapper():
