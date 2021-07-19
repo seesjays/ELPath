@@ -11,39 +11,56 @@ class PathingWindow:
     def __init__(self):
         self.pathing_host = PathfindingHost()
         self.window_size = 800
-        self.side_cell_count = 20
+        self.side_cell_count = 40
         self.cell_size = self.window_size/self.side_cell_count
+
+        self.min_x = 0
+        self.min_y = 0
+        self.max_x = 800
+        self.max_y = 800
+
+        self.start_point = (0, 0)
+        self.end_point = (39, 39)
+
         #self.message = self.pathing_host.alg_name
 
     def initialize_grid(self):
-        set_mouse_click_callback(self.get_clicked_cell)
-        
+        set_mouse_down_callback(self.get_clicked_cell)
+
         for i in range(self.side_cell_count):
             for j in range(self.side_cell_count):
+                itag = f"{i:02d}"
+                jtag = f"{j:02d}"
                 draw_rectangle("grid", [i*self.cell_size, j*self.cell_size], [(i+1)*self.cell_size, (j+1)*self.cell_size], [
-                               34, 36, 37, 255], fill=[255, 255, 255, 255], rounding=2, thickness=1)
+                               34, 36, 37, 255], fill=[255, 255, 255, 255], rounding=2, thickness=1, tag=f"{itag}{jtag}")
         #self.message = f"{self.pathing_host.alg_name}"
-
 
     def get_clicked_cell(self):
         pos = get_drawing_mouse_pos()
         left_bound_adjusted_x = pos[0]
         top_bound_adjusted_y = pos[1]
 
-        min_x = 0
-        min_y = 0
-        max_x = 800
-        max_y = 800
-
-        within_x =  left_bound_adjusted_x >= min_x and left_bound_adjusted_x <= max_x
-        within_y = top_bound_adjusted_y >= min_y and top_bound_adjusted_y <= max_y
+        within_x = left_bound_adjusted_x >= self.min_x and left_bound_adjusted_x <= self.max_x
+        within_y = top_bound_adjusted_y >= self.min_y and top_bound_adjusted_y <= self.max_y
 
         x_cell = trunc(pos[0]//self.cell_size)
         y_cell = trunc(pos[1]//self.cell_size)
 
-        if (get_active_window() == "Simulation" and within_x and within_y):
-            print(f"X: {x_cell}\nY: {y_cell}")
+        clearing = 1 if is_mouse_button_down(1) else 0
 
+        if (get_active_window() == "Simulation" and within_x and within_y):
+
+            print(f"X: {x_cell}\nY: {y_cell}")
+            itag = f"{x_cell:02d}"
+            jtag = f"{y_cell:02d}"
+            print(get_draw_command("grid", f"{itag}{jtag}"))
+
+            if (clearing):
+                modify_draw_command(
+                    "grid", f"{itag}{jtag}", fill=[255, 255, 255, 255])
+            else:
+                modify_draw_command(
+                    "grid", f"{itag}{jtag}", fill=[54, 54, 54, 255])
 
     def update(self, new_data):
         pass
