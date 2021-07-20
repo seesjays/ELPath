@@ -3,10 +3,12 @@ from random import randint
 from time import sleep
 
 class PathfindingHost:
-    def __init__(self, data_set=[]):
-        self.box_size = 30
+    def __init__(self, cellcount):
+        self.cellcount = cellcount*cellcount
 
-        self.step_counter = 0
+        self.start_point = (0, 0)
+        self.end_point = (39, 39)
+
 
     def set_algorithm(self, name):
         pass

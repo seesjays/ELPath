@@ -9,7 +9,7 @@ from math import trunc
 
 class PathingWindow:
     def __init__(self):
-        self.pathing_host = PathfindingHost()
+
         self.window_size = 800
         self.side_cell_count = 40
         self.cell_size = self.window_size/self.side_cell_count
@@ -19,8 +19,7 @@ class PathingWindow:
         self.max_x = 800
         self.max_y = 800
 
-        self.start_point = (0, 0)
-        self.end_point = (39, 39)
+        self.pathing_host = PathfindingHost(self.side_cell_count)
 
         #self.message = self.pathing_host.alg_name
 
@@ -34,6 +33,13 @@ class PathingWindow:
                 draw_rectangle("grid", [i*self.cell_size, j*self.cell_size], [(i+1)*self.cell_size, (j+1)*self.cell_size], [
                                34, 36, 37, 255], fill=[255, 255, 255, 255], rounding=2, thickness=1, tag=f"{itag}{jtag}")
         #self.message = f"{self.pathing_host.alg_name}"
+
+        # drawing the start and end positions
+
+        modify_draw_command(
+            "grid", f"{self.pathing_host.start_point[0]:02d}{self.pathing_host.start_point[1]:02d}", fill=[127, 255, 0, 255])
+        modify_draw_command(
+            "grid", f"{self.pathing_host.end_point[0]:02d}{self.pathing_host.end_point[1]:02d}", fill=[255, 0, 0, 255])
 
     def get_clicked_cell(self):
         pos = get_drawing_mouse_pos()
@@ -61,6 +67,12 @@ class PathingWindow:
             else:
                 modify_draw_command(
                     "grid", f"{itag}{jtag}", fill=[54, 54, 54, 255])
+
+        # prevent drawing over start and end
+        modify_draw_command(
+            "grid", f"{self.pathing_host.start_point[0]:02d}{self.pathing_host.start_point[1]:02d}", fill=[127, 255, 0, 255])
+        modify_draw_command(
+            "grid", f"{self.pathing_host.end_point[0]:02d}{self.pathing_host.end_point[1]:02d}", fill=[255, 0, 0, 255])
 
     def update(self, new_data):
         pass
