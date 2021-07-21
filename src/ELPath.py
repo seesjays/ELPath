@@ -12,6 +12,8 @@ class ELPath():
         self.step_sleep = 5
         self.algorithms = AlgorithmWindow()
         self.pathing = PathingWindow()
+        self.all_algorithms = [(algname, "sorting") for algname in self.algorithms.algorithms_host.alg_list] + [(algname, "pathing") for algname in self.pathing.pathing_host.alg_list]
+
         self.callbacks = {
             "next_step": self.update_info(self.algorithms.next_step),
             "original": self.update_info(self.algorithms.original_data),
@@ -20,7 +22,7 @@ class ELPath():
             "set_algorithm": self.update_info(self.algorithms.change_algorithm)
         }
         self.__initialize_window()
-        #self.__link_controls()
+        # self.__link_controls()
 
     def __initialize_window(self):
         # Window settings
@@ -44,12 +46,12 @@ class ELPath():
             pass
         with window("Simulation", height=800, width=800, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=30, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             add_drawing("grid", width=800, height=800, show=True)
-            self.pathing.initialize_grid()
-            
+            self.pathing.update_grid()
+
             #self.algorithms.initialize_plot()
             #self.algorithms.reset_plot()
             #self.__link_controls()
-            
+
     def update_info(self, func):
         def wrapper():
             func()
@@ -64,7 +66,7 @@ class ELPath():
         add_text("Algorithm:", parent="ELPath")
         add_combo("algorithm_combobox", label="", parent="ELPath",
                   default_value=self.algorithms.algorithms_host.alg_name,
-                  items=tuple(self.algorithms.algorithms_host.alg_list.keys()),
+                  items=self.all_algorithms,
                   callback=self.callbacks["set_algorithm"],
                   width=300)
 

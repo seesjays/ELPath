@@ -25,6 +25,7 @@ class PathingWindow:
 
     def initialize_grid(self):
         set_mouse_down_callback(self.get_clicked_cell)
+        self.pathing_host
 
         for i in range(self.side_cell_count):
             for j in range(self.side_cell_count):
@@ -40,6 +41,13 @@ class PathingWindow:
             "grid", f"{self.pathing_host.start_point[0]:02d}{self.pathing_host.start_point[1]:02d}", fill=[127, 255, 0, 255])
         modify_draw_command(
             "grid", f"{self.pathing_host.end_point[0]:02d}{self.pathing_host.end_point[1]:02d}", fill=[255, 0, 0, 255])
+
+    def draw_node(self, node):
+        draw_rectangle("grid", [node.x*self.cell_size, node.y*self.cell_size], [(node.x+1)*self.cell_size], [(node.y+1)*self.cell_size])
+
+    def update_grid(self):
+        for node in self.pathing_host.grid:
+            self.draw_node(node)
 
     def get_clicked_cell(self):
         pos = get_drawing_mouse_pos()
