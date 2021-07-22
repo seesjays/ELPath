@@ -12,17 +12,29 @@ class ELPath():
         self.step_sleep = 5
         self.algorithms = AlgorithmWindow()
         self.pathing = PathingWindow()
-        self.all_algorithms = [(algname, "sorting") for algname in self.algorithms.algorithms_host.alg_list] + [(algname, "pathing") for algname in self.pathing.pathing_host.alg_list]
 
-        self.callbacks = {
+        self.mode = "Pathfinding"
+
+        self.all_algorithms = {}
+        for algname in self.algorithms.algorithms_host.alg_list:
+            self.all_algorithms[algname] = "Sorting"
+        for algname in self.pathing.pathing_host.alg_list:
+            self.all_algorithms[algname] = "Pathfinding"
+
+        self.sorting_callbacks = {
             "next_step": self.update_info(self.algorithms.next_step),
             "original": self.update_info(self.algorithms.original_data),
             "run_sim": self.run_sim,
             "randomize": self.update_info(self.algorithms.new_dataset),
             "set_algorithm": self.update_info(self.algorithms.change_algorithm)
         }
+
+        self.pathfinding_callbacks = {
+            "run_sim": self.pathing.initialize_alg,
+            "Reset": self.pathing.reset,
+        }
+
         self.__initialize_window()
-        # self.__link_controls()
 
     def __initialize_window(self):
         # Window settings
@@ -45,38 +57,51 @@ class ELPath():
             set_value("alginfo", "")
             pass
         with window("Simulation", height=800, width=800, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=30, **cnsts.CHILD_WINDOW_FILL_PARAMS):
-            add_drawing("grid", width=800, height=800, show=True)
-            self.pathing.update_grid()
+            pass
 
-            #self.algorithms.initialize_plot()
-            #self.algorithms.reset_plot()
-            #self.__link_controls()
+            #
+            self.__switch_mode(self.mode)
 
-    def update_info(self, func):
-        def wrapper():
-            func()
-            set_value("alginfo", self.algorithms.message)
-        return wrapper
+    def __switch_mode(self, newmode):
+        self.__unlink_controls()
 
-    def update_info_no_wrapper(self):
-        set_value("alginfo", self.algorithms.message)
+        if (self.mode != newmode):  # swapping
+            if (newmode == "Sorting"):
+                self.pathing.unmount()
+                self.__link__sorting_controls()
+                self.algorithms.initialize_plot()
+                self.algorithms.reset_plot()
+            else:
+                self.algorithms.unmount()
+                self.pathing.initialize_grid()
+                self.__link_pathing_controls()
 
-    def __link_controls(self):
-        # Have to use a list for callback_data because for some reason, passing in a function reference as the data runs said function
+            self.mode = newmode
+        else:  # init
+            if (self.mode == "Sorting"):
+                self.algorithms.initialize_plot()
+                self.algorithms.reset_plot()
+                self.__link__sorting_controls()
+
+            else:
+                self.pathing.initialize_grid()
+                self.__link_pathing_controls()
+
+    def __link__sorting_controls(self):
         add_text("Algorithm:", parent="ELPath")
         add_combo("algorithm_combobox", label="", parent="ELPath",
                   default_value=self.algorithms.algorithms_host.alg_name,
-                  items=self.all_algorithms,
-                  callback=self.callbacks["set_algorithm"],
+                  items=list(self.all_algorithms.keys()),
+                  callback=self.change_algorithm,
                   width=300)
 
         add_spacing(parent="ELPath", count=5)
 
         add_checkbox("run_sim_checkbox", label="Run",
-                     parent="ELPath", callback=self.callbacks["run_sim"])
+                     parent="ELPath", callback=self.sorting_callbacks["run_sim"])
         add_same_line(parent="ELPath")
         add_button("next_step_button", label="Next Step",
-                   parent="ELPath", callback=self.callbacks["next_step"])
+                   parent="ELPath", callback=self.sorting_callbacks["next_step"])
 
         add_spacing(parent="ELPath", count=5)
 
@@ -88,11 +113,38 @@ class ELPath():
 
         add_text("Data:", parent="ELPath")
         add_button("original_data_button", label="Original Data",
-                   parent="ELPath", callback=self.callbacks["original"])
+                   parent="ELPath", callback=self.sorting_callbacks["original"])
         add_button("randomize_button", label="Randomize Data",
-                   parent="ELPath", callback=self.callbacks["randomize"])
+                   parent="ELPath", callback=self.sorting_callbacks["randomize"])
 
         add_spacing(parent="ELPath", count=5)
+
+    def __link_pathing_controls(self):
+        add_text("Algorithm:", parent="ELPath")
+        add_combo("algorithm_combobox", label="", parent="ELPath",
+                  default_value=self.pathing.pathing_host.alg_name,
+                  items=list(self.all_algorithms.keys()),
+                  callback=self.change_algorithm,
+                  width=300)
+
+        add_spacing(parent="ELPath", count=5)
+
+        add_checkbox("run_sim_checkbox", label="Run",
+                     parent="ELPath", callback=self.pathfinding_callbacks["run_sim"])
+
+        add_spacing(parent="ELPath", count=5)
+
+    def __unlink_controls(self):
+        delete_item("ELPath", children_only=True)
+
+    def change_algorithm(self):
+        newalgmode = self.all_algorithms[get_value("algorithm_combobox")]
+        if self.mode == "Sorting" and newalgmode == self.mode:
+            self.sorting_callbacks["set_algorithm"]()
+        elif self.mode == "Pathfinding" and newalgmode == self.mode:
+            pass
+        else:  # mismatch
+            self.__switch_mode(newalgmode)
 
     def run_sim(self, sender):
         configure_item("algorithm_combobox", enabled=False)
@@ -114,3 +166,12 @@ class ELPath():
         configure_item("original_data_button", enabled=True)
         configure_item("randomize_button", enabled=True)
         configure_item("next_step_button", enabled=True)
+
+    def update_info(self, func):
+        def wrapper():
+            func()
+            set_value("alginfo", self.algorithms.message)
+        return wrapper
+
+    def update_info_no_wrapper(self):
+        set_value("alginfo", self.algorithms.message)

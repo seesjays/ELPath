@@ -19,79 +19,86 @@ class PathingWindow:
         self.max_x = 800
         self.max_y = 800
 
-        self.pathing_host = PathfindingHost(self.side_cell_count)
-
+        self.pathing_host = PathfindingHost(self.side_cell_count, lambda node: self.update_node(node))
+        self.colors = {
+            "EMPTY": [255, 255, 255],
+            "START": [127, 255, 0],
+            "END": [255, 0, 0],
+            "OPEN": [255, 255, 0],
+            "CLOSE": [0, 191, 255],
+            "PATH": [138, 43, 226],
+            "BARR": [54, 54, 54]
+        }
         #self.message = self.pathing_host.alg_name
 
-    def initialize_grid(self):
-        set_mouse_down_callback(self.get_clicked_cell)
-        self.pathing_host
-
-        for i in range(self.side_cell_count):
-            for j in range(self.side_cell_count):
-                itag = f"{i:02d}"
-                jtag = f"{j:02d}"
-                draw_rectangle("grid", [i*self.cell_size, j*self.cell_size], [(i+1)*self.cell_size, (j+1)*self.cell_size], [
-                               34, 36, 37, 255], fill=[255, 255, 255, 255], rounding=2, thickness=1, tag=f"{itag}{jtag}")
-        #self.message = f"{self.pathing_host.alg_name}"
-
-        # drawing the start and end positions
-
-        modify_draw_command(
-            "grid", f"{self.pathing_host.start_point[0]:02d}{self.pathing_host.start_point[1]:02d}", fill=[127, 255, 0, 255])
-        modify_draw_command(
-            "grid", f"{self.pathing_host.end_point[0]:02d}{self.pathing_host.end_point[1]:02d}", fill=[255, 0, 0, 255])
-
     def draw_node(self, node):
-        draw_rectangle("grid", [node.x*self.cell_size, node.y*self.cell_size], [(node.x+1)*self.cell_size], [(node.y+1)*self.cell_size])
+        itag = f"{node.x:02d}"
+        jtag = f"{node.y:02d}"
+        draw_rectangle("grid", [node.x*self.cell_size, node.y*self.cell_size], [(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
+            34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
-    def update_grid(self):
-        for node in self.pathing_host.grid:
-            self.draw_node(node)
+    def update_node(self, node):
+        itag = f"{node.x:02d}"
+        jtag = f"{node.y:02d}"
+        modify_draw_command(
+            "grid", f"{itag}{jtag}", fill=self.colors[node.state])
 
-    def get_clicked_cell(self):
+    def initialize_grid(self):
+        add_drawing("grid", parent="Simulation",
+                    width=800, height=800, show=True)
+        set_mouse_down_callback(self.cell_clicked)
+        for row in self.pathing_host.grid:
+            for node in row:
+                self.draw_node(node)
+
+    def cell_clicked(self):
+        # Preventing click detection when outside of window
+        genpos = get_mouse_pos()
+        genpos[1] += 30  # account for window padding
+        if (genpos[1] > self.max_y or genpos[1] < self.min_y or genpos[0] < 0 or genpos[0] > self.max_x or get_active_window() != "Simulation"):
+            return
+
         pos = get_drawing_mouse_pos()
-        left_bound_adjusted_x = pos[0]
-        top_bound_adjusted_y = pos[1]
 
-        within_x = left_bound_adjusted_x >= self.min_x and left_bound_adjusted_x <= self.max_x
-        within_y = top_bound_adjusted_y >= self.min_y and top_bound_adjusted_y <= self.max_y
+        within_x = pos[0] >= self.min_x and pos[0] <= self.max_x
+        within_y = pos[1] >= self.min_y and pos[1] <= self.max_y
 
         x_cell = trunc(pos[0]//self.cell_size)
         y_cell = trunc(pos[1]//self.cell_size)
 
-        clearing = 1 if is_mouse_button_down(1) else 0
+        clearing = True if (is_mouse_button_down(1)) else False #True if right clicking
 
-        if (get_active_window() == "Simulation" and within_x and within_y):
+        if (within_x and within_y):
+            node = self.pathing_host.node_from_pos((x_cell, y_cell))
+            tempstate = node.get_state()
+            if clearing:
+                if (tempstate == "BARR"):
+                    node.set_state_empty()
+                if (tempstate == "START"):
+                    self.pathing_host.remove_start()
+                if (tempstate == "END"):
+                    self.pathing_host.remove_end()
 
-            print(f"X: {x_cell}\nY: {y_cell}")
-            itag = f"{x_cell:02d}"
-            jtag = f"{y_cell:02d}"
-            print(get_draw_command("grid", f"{itag}{jtag}"))
-
-            if (clearing):
-                modify_draw_command(
-                    "grid", f"{itag}{jtag}", fill=[255, 255, 255, 255])
             else:
-                modify_draw_command(
-                    "grid", f"{itag}{jtag}", fill=[54, 54, 54, 255])
+                if (tempstate == "EMPTY"):
+                    node.set_state_barrier()
 
-        # prevent drawing over start and end
-        modify_draw_command(
-            "grid", f"{self.pathing_host.start_point[0]:02d}{self.pathing_host.start_point[1]:02d}", fill=[127, 255, 0, 255])
-        modify_draw_command(
-            "grid", f"{self.pathing_host.end_point[0]:02d}{self.pathing_host.end_point[1]:02d}", fill=[255, 0, 0, 255])
+                if (self.pathing_host.start_point is None):
+                    self.pathing_host.add_start(node)
+                elif (self.pathing_host.end_point is None):
+                    self.pathing_host.add_end(node)
 
-    def update(self, new_data):
+            self.update_node(node)
+
+    def initialize_alg(self):
+        print("breadth")
+        self.pathing_host.initialize_neighbors()
+        print("first")
+        self.pathing_host.breadthfirst()
+
+    def reset(self):
         pass
-        self.message = f"{self.pathing_host.alg_name} Step {self.pathing_host.step_counter}: {new_data['message']}"
 
-    def next_step(self):
-        value = self.pathing_host.next_step()
-        self.update(value)
-        return value
-
-    def change_algorithm(self):
-        self.clear_highlights()
-        self.pathing_host.set_algorithm(get_value("algorithm_combobox"))
-        self.original_data()
+    def unmount(self):
+        delete_item("grid", children_only=False)
+        self.pathing_host = PathfindingHost(self.side_cell_count, lambda node: self.draw_node(node))

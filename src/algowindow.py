@@ -106,3 +106,11 @@ class AlgorithmWindow:
         self.clear_highlights()
         self.algorithms_host.reset_data()
         self.reset_plot()
+
+    def unmount(self):
+        self.new_dataset()
+        self.clear_highlights()
+        self.reset_plot()
+
+        delete_item("Algorithm")
+        self.algorithms_host = AlgorithmHost()
