@@ -184,11 +184,7 @@ class ELPath():
 
         while get_value(sender):
             i = self.pathing.next_step()
-
             sleep(get_value("step_sleep_slider")/100)
-
-            print(i)
-
             if (not i):
                 set_value(sender, False)
                 break

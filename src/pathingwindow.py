@@ -40,8 +40,12 @@ class PathingWindow:
     def update_node(self, node):
         itag = f"{node.x:02d}"
         jtag = f"{node.y:02d}"
-        modify_draw_command(
-            "grid", f"{itag}{jtag}", fill=self.colors[node.state])
+        if node.state == node.altstate:
+            modify_draw_command(
+                "grid", f"{itag}{jtag}", fill=self.colors[node.state])
+        else:
+            modify_draw_command(
+                "grid", f"{itag}{jtag}", fill=self.colors[node.altstate])
 
     def initialize_grid(self):
         add_drawing("grid", parent="Simulation",

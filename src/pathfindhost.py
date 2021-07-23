@@ -87,35 +87,64 @@ class PathfindingHost:
         up = self.node_from_pos((node.x, node.y+1))
         down = self.node_from_pos((node.x, node.y-1))
 
-        if right is not None:
+        if right is not None and right.state is not "BARR":
             node.neighbors.append(right)
-        if left is not None:
+        if left is not None and left.state is not "BARR":
             node.neighbors.append(left)
-        if up is not None:
+        if up is not None and up.state is not "BARR":
             node.neighbors.append(up)
-        if down is not None:
+        if down is not None and down.state is not "BARR":
             node.neighbors.append(down)
 
     # alg
     def breadthfirst(self, draw_func):
         frontier = queue.Queue()
         frontier.put(self.start)
-        reached = set()
-        reached.add(self.start)
-
-        yield 1
+        came_from = dict()
+        came_from[self.start] = None
 
         while not frontier.empty():
             current = frontier.get()
+
+            if current == self.end:
+                self.start.set_alt_state("START")
+                draw_func(self.start)
+                self.end.set_alt_state("END")
+                draw_func(self.end)
+                break
+
             current.set_state_open()
             draw_func(current)
-            for next in current.neighbors:
-                if next not in reached:
-                    frontier.put(next)
-                    reached.add(next)
-                    next.set_state_closed()
-                    draw_func(next)
+            for nxt in current.neighbors:
+                if nxt not in came_from:
+                    frontier.put(nxt)
+                    came_from[nxt] = current
+                    nxt.set_state_closed()
+                    draw_func(nxt)
+                    
+                self.start.set_alt_state("START")
+                draw_func(self.start)
+                self.end.set_alt_state("END")
+                draw_func(self.end)
+
+                     
             yield 1
+
+        print("path found")
+        current = self.end
+        path = []
+        while current != self.start: 
+            print("finding")
+            path.append(current)
+            current.set_state_path()
+            draw_func(current)
+            current = came_from[current]
+
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+            yield 2
 
     def initialize_neighbors(self):
         for row in self.grid:
@@ -127,10 +156,8 @@ class PathfindingHost:
     def next_step(self):
         result = next(self.current_alg)
         if not result:
-            print(result, 1)
             return False
         else:
-            print(result, 2)
             return True
         # Notice that we don't return any actual data here, unlike the sorting next_step
         # We do all the window updating work in the algorithm
@@ -139,6 +166,13 @@ class Node:
     def __init__(self, pos, grid_side_length):
         self.x, self.y = pos
         self.state = "EMPTY"
+        self.altstate = "EMPTY"
+        # altstate is a way to keep nodes from changing color when they're drawn
+        # For example, it would be reasonable to have the start node always be green,
+        # even when added to the closed set of an algorithm.
+        # Thus, in such cases, it makes sense to maintain the actual state
+        # but use altstate as a facade of sorts, to clearly visualize what's necessary.
+    
         self.neighbors = []
         self.sidecount = grid_side_length
 
@@ -149,19 +183,22 @@ class Node:
         return self.state
 
     def set_state_start(self):
-        self.state = "START"
+        self.altstate = self.state = "START"
     def set_state_end(self):
-        self.state = "END"
+        self.altstate = self.state = "END"
 
     def set_state_open(self):
-        self.state = "OPEN"
+        self.altstate = self.state = "OPEN"
     def set_state_closed(self):
-        self.state = "CLOSE"
+        self.altstate = self.state = "CLOSE"
 
     def set_state_path(self):
-        self.state = "PATH"
+        self.altstate = self.state = "PATH"
 
     def set_state_empty(self):
-        self.state = "EMPTY"    
+        self.altstate = self.state = "EMPTY"    
     def set_state_barrier(self):
-        self.state = "BARR"
+        self.altstate = self.state = "BARR"
+
+    def set_alt_state(self, state):
+        self.altstate = state
