@@ -30,7 +30,8 @@ class ELPath():
         }
 
         self.pathfinding_callbacks = {
-            "run_sim": self.pathing.initialize_alg,
+            "run_sim": self.run_pathfinding,
+            "next_step": self.pathing.next_step,
             "Reset": self.pathing.reset,
         }
 
@@ -131,6 +132,16 @@ class ELPath():
 
         add_checkbox("run_sim_checkbox", label="Run",
                      parent="ELPath", callback=self.pathfinding_callbacks["run_sim"])
+        add_same_line(parent="ELPath")
+        add_button("next_step_button", label="Next Step",
+                   parent="ELPath", callback=self.pathfinding_callbacks["next_step"])
+
+        add_spacing(parent="ELPath", count=5)
+
+        add_text("Speed:", parent="ELPath")
+        add_slider_int("step_sleep_slider", label="", parent="ELPath", width=300,
+                       default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
+
 
         add_spacing(parent="ELPath", count=5)
 
@@ -165,6 +176,24 @@ class ELPath():
         configure_item("algorithm_combobox", enabled=True)
         configure_item("original_data_button", enabled=True)
         configure_item("randomize_button", enabled=True)
+        configure_item("next_step_button", enabled=True)
+
+    def run_pathfinding(self, sender):
+        configure_item("algorithm_combobox", enabled=False)
+        configure_item("next_step_button", enabled=False)
+
+        while get_value(sender):
+            i = self.pathing.next_step()
+
+            sleep(get_value("step_sleep_slider")/100)
+
+            print(i)
+
+            if (not i):
+                set_value(sender, False)
+                break
+
+        configure_item("algorithm_combobox", enabled=True)
         configure_item("next_step_button", enabled=True)
 
     def update_info(self, func):

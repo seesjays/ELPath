@@ -9,7 +9,6 @@ from math import trunc
 
 class PathingWindow:
     def __init__(self):
-
         self.window_size = 800
         self.side_cell_count = 40
         self.cell_size = self.window_size/self.side_cell_count
@@ -19,7 +18,8 @@ class PathingWindow:
         self.max_x = 800
         self.max_y = 800
 
-        self.pathing_host = PathfindingHost(self.side_cell_count, lambda node: self.update_node(node))
+        self.pathing_host = PathfindingHost(
+            self.side_cell_count, lambda node: self.update_node(node))
         self.colors = {
             "EMPTY": [255, 255, 255],
             "START": [127, 255, 0],
@@ -66,7 +66,8 @@ class PathingWindow:
         x_cell = trunc(pos[0]//self.cell_size)
         y_cell = trunc(pos[1]//self.cell_size)
 
-        clearing = True if (is_mouse_button_down(1)) else False #True if right clicking
+        clearing = True if (is_mouse_button_down(
+            1)) else False  # True if right clicking
 
         if (within_x and within_y):
             node = self.pathing_host.node_from_pos((x_cell, y_cell))
@@ -82,23 +83,22 @@ class PathingWindow:
             else:
                 if (tempstate == "EMPTY"):
                     node.set_state_barrier()
-
-                if (self.pathing_host.start_point is None):
-                    self.pathing_host.add_start(node)
-                elif (self.pathing_host.end_point is None):
-                    self.pathing_host.add_end(node)
+                    if (self.pathing_host.start_point is None):
+                        self.pathing_host.add_start(node)
+                    elif (self.pathing_host.end_point is None):
+                        self.pathing_host.add_end(node)
 
             self.update_node(node)
 
-    def initialize_alg(self):
-        print("breadth")
-        self.pathing_host.initialize_neighbors()
-        print("first")
-        self.pathing_host.breadthfirst()
+    def next_step(self):
+        if not self.pathing_host.initialized:
+            self.pathing_host.initialize_neighbors()
+        return self.pathing_host.next_step()
 
     def reset(self):
         pass
 
     def unmount(self):
         delete_item("grid", children_only=False)
-        self.pathing_host = PathfindingHost(self.side_cell_count, lambda node: self.draw_node(node))
+        self.pathing_host = PathfindingHost(
+            self.side_cell_count, lambda node: self.draw_node(node))
