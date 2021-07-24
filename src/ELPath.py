@@ -32,7 +32,8 @@ class ELPath():
         self.pathfinding_callbacks = {
             "run_sim": self.run_pathfinding,
             "next_step": self.pathing.next_step,
-            "Reset": self.pathing.reset,
+            "reset": self.pathing.reset,
+            "retry": self.pathing.retry
         }
 
         self.__initialize_window()
@@ -142,8 +143,13 @@ class ELPath():
         add_slider_int("step_sleep_slider", label="", parent="ELPath", width=300,
                        default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
 
-
         add_spacing(parent="ELPath", count=5)
+
+        add_text("Maze:", parent="ELPath")
+        add_button("original_data_button", label="Retry Maze",
+                   parent="ELPath", callback=self.pathfinding_callbacks["retry"])
+        add_button("randomize_button", label="Reset",
+                   parent="ELPath", callback=self.pathfinding_callbacks["reset"])
 
     def __unlink_controls(self):
         delete_item("ELPath", children_only=True)

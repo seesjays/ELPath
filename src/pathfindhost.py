@@ -30,7 +30,7 @@ class PathfindingHost:
                 self.grid[y].append(node)   
         
         self.start_point = (0, 0)
-        self.end_point = (39, 39)
+        self.end_point = (sidecellcount-1, sidecellcount-1)
 
         self.start = self.node_from_pos(self.start_point)
         self.end = self.node_from_pos(self.end_point)

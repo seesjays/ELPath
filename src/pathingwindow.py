@@ -97,10 +97,19 @@ class PathingWindow:
     def next_step(self):
         if not self.pathing_host.initialized:
             self.pathing_host.initialize_neighbors()
+            set_mouse_down_callback(None)
         return self.pathing_host.next_step()
 
     def reset(self):
-        pass
+        set_mouse_down_callback(self.cell_clicked)
+        delete_item("grid")
+        self.pathing_host = PathfindingHost(
+            self.side_cell_count, lambda node: self.update_node(node))
+        self.initialize_grid()
+
+    def retry(self):
+        set_mouse_down_callback(self.cell_clicked)
+
 
     def unmount(self):
         delete_item("grid", children_only=False)
