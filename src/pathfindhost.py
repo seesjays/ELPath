@@ -18,6 +18,7 @@ That modified version of merge sort from the sorting portion?
 That's what drove this decision.
 """
 
+
 class PathfindingHost:
     def __init__(self, sidecellcount, draw_node_func):
         self.sidecellcount = sidecellcount
@@ -27,8 +28,8 @@ class PathfindingHost:
             self.grid.append([])
             for x in range(sidecellcount):
                 node = Node((x, y), sidecellcount)
-                self.grid[y].append(node)   
-        
+                self.grid[y].append(node)
+
         self.start_point = (0, 0)
         self.end_point = (sidecellcount-1, sidecellcount-1)
 
@@ -47,7 +48,7 @@ class PathfindingHost:
         self.current_alg = self.alg_list[self.alg_name]
 
         self.initialized = False
-
+        self.step_counter = 0
 
     def node_from_pos(self, pos):
         y = pos[1]
@@ -69,7 +70,6 @@ class PathfindingHost:
         self.start_point = None
         self.start = None
 
-
     def add_end(self, node):
         node.set_state_end()
         self.end_point = (node.x, node.y)
@@ -87,13 +87,13 @@ class PathfindingHost:
         up = self.node_from_pos((node.x, node.y+1))
         down = self.node_from_pos((node.x, node.y-1))
 
-        if right is not None and right.state is not "BARR":
+        if right is not None and right.state != "BARR":
             node.neighbors.append(right)
-        if left is not None and left.state is not "BARR":
+        if left is not None and left.state != "BARR":
             node.neighbors.append(left)
-        if up is not None and up.state is not "BARR":
+        if up is not None and up.state != "BARR":
             node.neighbors.append(up)
-        if down is not None and down.state is not "BARR":
+        if down is not None and down.state != "BARR":
             node.neighbors.append(down)
 
     # alg
@@ -121,20 +121,17 @@ class PathfindingHost:
                     came_from[nxt] = current
                     nxt.set_state_closed()
                     draw_func(nxt)
-                    
+
                 self.start.set_alt_state("START")
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
 
-                     
             yield 1
 
-        print("path found")
         current = self.end
         path = []
-        while current != self.start: 
-            print("finding")
+        while current != self.start:
             path.append(current)
             current.set_state_path()
             draw_func(current)
@@ -149,18 +146,32 @@ class PathfindingHost:
     def initialize_neighbors(self):
         for row in self.grid:
             for node in row:
+                node.origstate = node.state
                 self.update_node_neighbors(node)
         self.initialized = True
         self.current_alg = self.current_alg()
 
+    def reinit_maze(self):
+        self.step_counter = 0
+        for row in self.grid:
+            for node in row:
+                node.neighbors = []
+                node.state = node.altstate = node.origstate
+        self.initialized = False
+        self.current_alg = self.alg_list[self.alg_name]
+
+
+
     def next_step(self):
-        result = next(self.current_alg)
-        if not result:
+        try:
+            self.step_counter += 1
+            return next(self.current_alg)
+        except StopIteration:
+            self.step_counter -= 1
             return False
-        else:
-            return True
         # Notice that we don't return any actual data here, unlike the sorting next_step
         # We do all the window updating work in the algorithm
+
 
 class Node:
     def __init__(self, pos, grid_side_length):
@@ -172,7 +183,10 @@ class Node:
         # even when added to the closed set of an algorithm.
         # Thus, in such cases, it makes sense to maintain the actual state
         # but use altstate as a facade of sorts, to clearly visualize what's necessary.
-    
+
+        self.origstate = "EMPTY"
+        # origstate is so we can reinitialize the maze for retries on grid initialization
+        # just keeps track of it's original state before grid initialization
         self.neighbors = []
         self.sidecount = grid_side_length
 
@@ -184,11 +198,13 @@ class Node:
 
     def set_state_start(self):
         self.altstate = self.state = "START"
+
     def set_state_end(self):
         self.altstate = self.state = "END"
 
     def set_state_open(self):
         self.altstate = self.state = "OPEN"
+
     def set_state_closed(self):
         self.altstate = self.state = "CLOSE"
 
@@ -196,7 +212,8 @@ class Node:
         self.altstate = self.state = "PATH"
 
     def set_state_empty(self):
-        self.altstate = self.state = "EMPTY"    
+        self.altstate = self.state = "EMPTY"
+
     def set_state_barrier(self):
         self.altstate = self.state = "BARR"
 

@@ -189,9 +189,10 @@ class ELPath():
         configure_item("next_step_button", enabled=False)
 
         while get_value(sender):
-            i = self.pathing.next_step()
+            updated = self.pathing.next_step()
             sleep(get_value("step_sleep_slider")/100)
-            if (not i):
+            
+            if (not updated):
                 set_value(sender, False)
                 break
 
