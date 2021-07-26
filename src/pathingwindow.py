@@ -13,7 +13,7 @@ class PathingWindow:
         self.side_cell_count = 40
         self.cell_size = self.window_size/self.side_cell_count
 
-        self.min_x = 0
+        self.min_x = cnsts.SIDEBAR_WIDTH
         self.min_y = 0
         self.max_x = 800
         self.max_y = 800
@@ -34,7 +34,7 @@ class PathingWindow:
     def draw_node(self, node):
         itag = f"{node.x:02d}"
         jtag = f"{node.y:02d}"
-        draw_rectangle("grid", [node.x*self.cell_size, node.y*self.cell_size], [(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
+        draw_rectangle("##FOREGROUND", [self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
             34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
     def update_node(self, node):
@@ -42,13 +42,13 @@ class PathingWindow:
         jtag = f"{node.y:02d}"
         if node.state == node.altstate:
             modify_draw_command(
-                "grid", f"{itag}{jtag}", fill=self.colors[node.state])
+                "##FOREGROUND", f"{itag}{jtag}", fill=self.colors[node.state])
         else:
             modify_draw_command(
-                "grid", f"{itag}{jtag}", fill=self.colors[node.altstate])
+                "##FOREGROUND", f"{itag}{jtag}", fill=self.colors[node.altstate])
 
     def initialize_grid(self):
-        add_drawing("grid", parent="Simulation",
+        add_drawing("grid", parent="ELPath",
                     width=800, height=800, show=True)
         set_mouse_down_callback(self.cell_clicked)
         for row in self.pathing_host.grid:
