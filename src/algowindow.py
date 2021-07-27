@@ -10,6 +10,7 @@ from time import sleep
 class AlgorithmWindow:
     def __init__(self):
         self.algorithms_host = AlgorithmHost()
+        
         self.message = self.algorithms_host.alg_name
 
         self.highlight_list = []
@@ -29,6 +30,8 @@ class AlgorithmWindow:
     def initialize_plot(self):
         add_plot("Algorithm", parent="Simulation", height=790, width=790,
                  **cnsts.UNINTERACTIVE_GRAPH_PARAMS)
+        self.set_limits()
+
 
     def reset_plot(self):
         set_item_label("Algorithm", f"{self.algorithms_host.alg_name}")
@@ -101,6 +104,11 @@ class AlgorithmWindow:
         self.clear_highlights()
         self.algorithms_host.set_algorithm(get_value("algorithm_combobox"))
         self.original_data()
+        
+    def change_algorithm(self, newalg):
+        self.clear_highlights()
+        self.algorithms_host.set_algorithm(newalg)
+        self.original_data()
 
     def original_data(self):
         self.clear_highlights()
@@ -108,9 +116,6 @@ class AlgorithmWindow:
         self.reset_plot()
 
     def unmount(self):
-        self.new_dataset()
-        self.clear_highlights()
-        self.reset_plot()
-
         delete_item("Algorithm")
-        self.algorithms_host = AlgorithmHost()
+        self.algorithms_host = None
+        

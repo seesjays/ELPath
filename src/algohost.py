@@ -3,7 +3,7 @@ from random import randint
 from time import sleep
 
 class AlgorithmHost:
-    def __init__(self, data_set=[]):
+    def __init__(self, algorithm="Quick Sort"):
         self.data_set_size = 30
 
         self.step_counter = 0
@@ -12,7 +12,6 @@ class AlgorithmHost:
         self.data_original = []
         self.data_y = []
 
-        self.alg_name = "Quick Sort"
         self.alg_list = {
             "Quick Sort": (lambda dataset: algs.quick_sort(0, self.data_set_size-1, self.data_y)),
             "Merge Sort": (lambda dataset: algs.merge(self.data_y)),
@@ -21,11 +20,10 @@ class AlgorithmHost:
             "Selection Sort": (lambda dataset: algs.selection(self.data_y)),
             "Cocktail Sort": (lambda dataset: algs.cocktail(self.data_y)),
         }
-
+        self.alg_name = algorithm
         self.current_algorithm = self.alg_list[self.alg_name]
 
-        if not data_set:
-            self.set_random_data()
+        self.set_random_data()
 
     def set_algorithm(self, name):
         self.alg_name = name

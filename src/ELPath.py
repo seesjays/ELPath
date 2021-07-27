@@ -10,33 +10,15 @@ from pathingwindow import PathingWindow
 class ELPath():
     def __init__(self):
         self.step_sleep = 5
-        self.algorithms = AlgorithmWindow()
-        self.pathing = PathingWindow()
+        self.algorithms = None
+        self.pathing = None
 
-        self.mode = "Pathfinding"
+        self.mode = "Sorting"
 
         self.all_algorithms = {}
-        for algname in self.algorithms.algorithms_host.alg_list:
-            self.all_algorithms[algname] = "Sorting"
-        for algname in self.pathing.pathing_host.alg_list:
-            self.all_algorithms[algname] = "Pathfinding"
-
-        self.sorting_callbacks = {
-            "next_step": self.update_info(self.algorithms.next_step),
-            "original": self.update_info(self.algorithms.original_data),
-            "run_sim": self.run_sim,
-            "randomize": self.update_info(self.algorithms.new_dataset),
-            "set_algorithm": self.update_info(self.algorithms.change_algorithm)
-        }
-
-        self.pathfinding_callbacks = {
-            "run_sim": self.run_pathfinding,
-            "next_step": self.pathing.next_step,
-            "reset": self.pathing.reset,
-            "retry": self.pathing.retry
-        }
 
         self.__initialize_window()
+        self.__mount(self.mode, "Quick Sort")
 
     def __initialize_window(self):
         # Window settings
@@ -61,35 +43,75 @@ class ELPath():
         with window("Simulation", height=800, width=800, no_scrollbar=True, x_pos=cnsts.SIDEBAR_WIDTH, y_pos=30, **cnsts.CHILD_WINDOW_FILL_PARAMS):
             pass
 
-            #
-            self.__switch_mode(self.mode)
+        # populate alg list for combobox
+        tempalgs = AlgorithmWindow()
+        for algname in tempalgs.algorithms_host.alg_list:
+            self.all_algorithms[algname] = "Sorting"
+        tempalgs = PathingWindow()
+        for algname in tempalgs.pathing_host.alg_list:
+            self.all_algorithms[algname] = "Pathfinding"
+        tempalgs = None
 
-    def __switch_mode(self, newmode):
-        self.__unlink_controls()
+    def __unmount(self):
+        delete_item("ELPath", children_only=True)  # remove controls
+        if self.mode == "Sorting":
+            self.algorithms.unmount()
+            self.algorithms = None
+        elif self.mode == "Pathfinding":
+            self.pathing.unmount()
+            self.pathing = None
+        delete_item("Simulation", children_only=True)
 
-        if (self.mode != newmode):  # swapping
-            if (newmode == "Sorting"):
-                self.pathing.unmount()
-                self.__link__sorting_controls()
-                self.algorithms.initialize_plot()
-                self.algorithms.reset_plot()
-            else:
-                self.algorithms.unmount()
-                self.pathing.initialize_grid()
-                self.__link_pathing_controls()
+    def change_algorithm(self):
+        newalg = get_value("algorithm_combobox")
+        newalgmode = self.all_algorithms[newalg]
+        if self.mode == "Sorting" and newalgmode == self.mode:
+            self.sorting_callbacks["set_algorithm"](newalg)
+            self.update_info_no_wrapper()
+        elif self.mode == "Pathfinding" and newalgmode == self.mode:
+            pass
+        else:  # mismatch
+            self.__unmount()
+            self.__mount(newalgmode, newalg)
 
-            self.mode = newmode
-        else:  # init
-            if (self.mode == "Sorting"):
-                self.algorithms.initialize_plot()
-                self.algorithms.reset_plot()
-                self.__link__sorting_controls()
+    def __mount_sorting(self, alg):
+        self.algorithms = AlgorithmWindow()
+        self.sorting_callbacks = {
+            "next_step": self.update_info(self.algorithms.next_step),
+            "original": self.update_info(self.algorithms.original_data),
+            "run_sim": self.run_sim,
+            "randomize": self.update_info(self.algorithms.new_dataset),
+            "set_algorithm": self.algorithms.change_algorithm
+        }
+        self.algorithms.initialize_plot()
+        self.algorithms.reset_plot()
+        self.algorithms.change_algorithm(alg)
 
-            else:
-                self.pathing.initialize_grid()
-                self.__link_pathing_controls()
+    def __mount_pathing(self, alg):
+        self.pathing = PathingWindow()
+        self.pathfinding_callbacks = {
+            "run_sim": self.run_pathfinding,
+            "next_step": self.pathing.next_step,
+            "reset": self.pathing.reset,
+            "retry": self.pathing.retry
+        }
+        self.pathing.initialize_grid()
+        self.pathing.change_algorithm(alg)
 
-    def __link__sorting_controls(self):
+    def __mount(self, newmode, newalg):
+        if (newmode == "Sorting"):
+            self.__mount_sorting(newalg)
+            self.__link_sorting_controls()
+            self.curr_window = self.algorithms
+        else:
+            self.__mount_pathing(newalg)
+            self.__link_pathing_controls()
+            self.curr_window = self.pathing
+
+        self.mode = newmode
+        self.update_info_no_wrapper()
+
+    def __link_sorting_controls(self):
         add_text("Algorithm:", parent="ELPath")
         add_combo("algorithm_combobox", label="", parent="ELPath",
                   default_value=self.algorithms.algorithms_host.alg_name,
@@ -146,22 +168,10 @@ class ELPath():
         add_spacing(parent="ELPath", count=5)
 
         add_text("Maze:", parent="ELPath")
-        add_button("original_data_button", label="Retry Maze",
+        add_button("retry_button", label="Retry Maze",
                    parent="ELPath", callback=self.pathfinding_callbacks["retry"])
-        add_button("randomize_button", label="Reset",
+        add_button("reset_button", label="Reset",
                    parent="ELPath", callback=self.pathfinding_callbacks["reset"])
-
-    def __unlink_controls(self):
-        delete_item("ELPath", children_only=True)
-
-    def change_algorithm(self):
-        newalgmode = self.all_algorithms[get_value("algorithm_combobox")]
-        if self.mode == "Sorting" and newalgmode == self.mode:
-            self.sorting_callbacks["set_algorithm"]()
-        elif self.mode == "Pathfinding" and newalgmode == self.mode:
-            pass
-        else:  # mismatch
-            self.__switch_mode(newalgmode)
 
     def run_sim(self, sender):
         configure_item("algorithm_combobox", enabled=False)
@@ -187,23 +197,29 @@ class ELPath():
     def run_pathfinding(self, sender):
         configure_item("algorithm_combobox", enabled=False)
         configure_item("next_step_button", enabled=False)
+        configure_item("retry_button", enabled=False)
+        configure_item("reset_button", enabled=False)
 
         while get_value(sender):
             updated = self.pathing.next_step()
             sleep(get_value("step_sleep_slider")/100)
-            
+
             if (not updated):
                 set_value(sender, False)
                 break
 
         configure_item("algorithm_combobox", enabled=True)
         configure_item("next_step_button", enabled=True)
+        configure_item("retry_button", enabled=True)
+        configure_item("reset_button", enabled=True)
+
 
     def update_info(self, func):
         def wrapper():
             func()
-            set_value("alginfo", self.algorithms.message)
+            set_value("alginfo", self.curr_window.message)
+
         return wrapper
 
     def update_info_no_wrapper(self):
-        set_value("alginfo", self.algorithms.message)
+        set_value("alginfo", self.curr_window.message)

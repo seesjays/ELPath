@@ -13,7 +13,7 @@ class PathingWindow:
         self.side_cell_count = 40
         self.cell_size = self.window_size/self.side_cell_count
 
-        self.min_x = cnsts.SIDEBAR_WIDTH
+        self.min_x = 0
         self.min_y = 0
         self.max_x = 800
         self.max_y = 800
@@ -29,12 +29,18 @@ class PathingWindow:
             "PATH": [138, 43, 226],
             "BARR": [54, 54, 54]
         }
-        #self.message = self.pathing_host.alg_name
+        self.message = self.pathing_host.alg_name
+
+    def change_algorithm(self):
+        self.pathing_host.set_algorithm(get_value("algorithm_combobox"))
+        
+    def change_algorithm(self, alg):
+            self.pathing_host.set_algorithm(alg)
 
     def draw_node(self, node):
         itag = f"{node.x:02d}"
         jtag = f"{node.y:02d}"
-        draw_rectangle("##FOREGROUND", [self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
+        draw_rectangle("grid", [self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
             34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
     def update_node(self, node):
@@ -42,13 +48,13 @@ class PathingWindow:
         jtag = f"{node.y:02d}"
         if node.state == node.altstate:
             modify_draw_command(
-                "##FOREGROUND", f"{itag}{jtag}", fill=self.colors[node.state])
+                "grid", f"{itag}{jtag}", fill=self.colors[node.state])
         else:
             modify_draw_command(
-                "##FOREGROUND", f"{itag}{jtag}", fill=self.colors[node.altstate])
+                "grid", f"{itag}{jtag}", fill=self.colors[node.altstate])
 
     def initialize_grid(self):
-        add_drawing("grid", parent="ELPath",
+        add_drawing("grid", parent="Simulation",
                     width=800, height=800, show=True)
         set_mouse_down_callback(self.cell_clicked)
         for row in self.pathing_host.grid:
@@ -117,5 +123,5 @@ class PathingWindow:
 
     def unmount(self):
         delete_item("grid", children_only=False)
-        self.pathing_host = PathfindingHost(
-            self.side_cell_count, lambda node: self.draw_node(node))
+        self.pathing_host = None
+

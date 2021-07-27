@@ -20,7 +20,7 @@ That's what drove this decision.
 
 
 class PathfindingHost:
-    def __init__(self, sidecellcount, draw_node_func):
+    def __init__(self, sidecellcount, draw_node_func, algorithm="Breadth-First Search"):
         self.sidecellcount = sidecellcount
 
         self.grid = []
@@ -44,11 +44,16 @@ class PathfindingHost:
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node))
         }
-        self.alg_name = "Breadth-First Search"
-        self.current_alg = self.alg_list[self.alg_name]
+        self.alg_name = algorithm
+        self.current_algorithm = self.alg_list[self.alg_name]
 
         self.initialized = False
         self.step_counter = 0
+
+    def set_algorithm(self, name):
+        self.alg_name = name
+        self.step_counter = 0
+        self.current_algorithm = self.alg_list[name]
 
     def node_from_pos(self, pos):
         y = pos[1]
@@ -149,7 +154,7 @@ class PathfindingHost:
                 node.origstate = node.state
                 self.update_node_neighbors(node)
         self.initialized = True
-        self.current_alg = self.current_alg()
+        self.current_algorithm = self.current_algorithm()
 
     def reinit_maze(self):
         self.step_counter = 0
@@ -158,14 +163,12 @@ class PathfindingHost:
                 node.neighbors = []
                 node.state = node.altstate = node.origstate
         self.initialized = False
-        self.current_alg = self.alg_list[self.alg_name]
-
-
+        self.current_algorithm = self.alg_list[self.alg_name]
 
     def next_step(self):
         try:
             self.step_counter += 1
-            return next(self.current_alg)
+            return next(self.current_algorithm)
         except StopIteration:
             self.step_counter -= 1
             return False
