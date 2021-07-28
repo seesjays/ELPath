@@ -42,7 +42,10 @@ class PathfindingHost:
         self.draw_node = draw_node_func
 
         self.alg_list = {
-            "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node))
+            "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
+            "Dijkstra's Algorithm": (lambda: self.dijkstra(self.draw_node)),
+            "A* Algorithm": (lambda: self.astar(self.draw_node)),
+
         }
         self.alg_name = algorithm
         self.current_algorithm = self.alg_list[self.alg_name]
@@ -101,7 +104,39 @@ class PathfindingHost:
         if down is not None and down.state != "BARR":
             node.neighbors.append(down)
 
-    # alg
+    def cost(self, node, node2):
+        return 1
+
+    def initialize_neighbors(self):
+        for row in self.grid:
+            for node in row:
+                node.origstate = node.state
+                self.update_node_neighbors(node)
+        self.initialized = True
+        self.current_algorithm = self.current_algorithm()
+
+    def reinit_maze(self):
+        self.step_counter = 0
+        for row in self.grid:
+            for node in row:
+                node.neighbors = []
+                node.state = node.altstate = node.origstate
+        self.add_start(self.node_from_pos(self.start_point))
+        self.add_end(self.node_from_pos(self.end_point))
+        self.initialized = False
+        self.current_algorithm = self.alg_list[self.alg_name]
+
+    def next_step(self):
+        try:
+            self.step_counter += 1
+            return next(self.current_algorithm)
+        except StopIteration:
+            self.step_counter -= 1
+            return False
+        # Notice that we don't return any actual data here, unlike the sorting next_step
+        # We do all the window updating work in the algorithm
+
+    # algs
     def breadthfirst(self, draw_func):
         frontier = queue.Queue()
         frontier.put(self.start)
@@ -110,6 +145,9 @@ class PathfindingHost:
 
         while not frontier.empty():
             current = frontier.get()
+            current.set_state_open()
+            current.set_alt_state("SPCL")
+            draw_func(current)
 
             if current == self.end:
                 self.start.set_alt_state("START")
@@ -118,19 +156,27 @@ class PathfindingHost:
                 draw_func(self.end)
                 break
 
-            current.set_state_open()
-            draw_func(current)
+            
             for nxt in current.neighbors:
+                nxt.set_state_open()
+                draw_func(nxt)
+                yield 1
+
                 if nxt not in came_from:
                     frontier.put(nxt)
                     came_from[nxt] = current
-                    nxt.set_state_closed()
-                    draw_func(nxt)
 
-                self.start.set_alt_state("START")
-                draw_func(self.start)
-                self.end.set_alt_state("END")
-                draw_func(self.end)
+                nxt.set_state_closed()
+                draw_func(nxt)
+                
+            current.reset_alt_state()
+                                
+            current.set_state_closed()
+            draw_func(current)
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
 
             yield 1
 
@@ -148,33 +194,104 @@ class PathfindingHost:
             draw_func(self.end)
             yield 2
 
-    def initialize_neighbors(self):
-        for row in self.grid:
-            for node in row:
-                node.origstate = node.state
-                self.update_node_neighbors(node)
-        self.initialized = True
-        self.current_algorithm = self.current_algorithm()
+    def dijkstra(self, draw_func):
+        frontier = queue.PriorityQueue()
+        frontier.put(self.start, 0)
+        came_from = dict()
+        cost_so_far = dict()
+        came_from[self.start] = None
+        cost_so_far[self.start] = 0
 
-    def reinit_maze(self):
-        self.step_counter = 0
-        for row in self.grid:
-            for node in row:
-                node.neighbors = []
-                node.state = node.altstate = node.origstate
-        self.initialized = False
-        self.current_algorithm = self.alg_list[self.alg_name]
+        while not frontier.empty():
+            current = frontier.get()
+            current.set_alt_state("SPCL")
+            draw_func(current)
+            yield 1
+            if current == self.end:
+                break
+            for nxt in current.neighbors:
+                nxt.set_state_open()
+                draw_func(nxt)
+                new_cost = cost_so_far[current] + self.cost(current, nxt)
+                if nxt not in cost_so_far or new_cost < cost_so_far[nxt]:
+                    cost_so_far[nxt] = new_cost
+                    priority = new_cost    
+                    frontier.put(nxt, priority)
+                    came_from[nxt] = current
+                self.start.set_alt_state("START")
+                draw_func(self.start)
+                self.end.set_alt_state("END")
+                draw_func(self.end)
+                yield 1
+            current.set_state_open()
+            draw_func(current)
+        current = self.end
+        path = []
+        while current != self.start:
+            path.append(current)
+            current.set_state_path()
+            draw_func(current)
+            current = came_from[current]
 
-    def next_step(self):
-        try:
-            self.step_counter += 1
-            return next(self.current_algorithm)
-        except StopIteration:
-            self.step_counter -= 1
-            return False
-        # Notice that we don't return any actual data here, unlike the sorting next_step
-        # We do all the window updating work in the algorithm
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+            yield 2
 
+    def astar(self, draw_func):
+        count = 0
+        open_set = queue.PriorityQueue()
+        open_set.put((0, count, self.start))
+        came_from = {}
+        g_score = {spot: float("inf") for row in self.grid for spot in row}
+        g_score[self.start] = 0
+        f_score = {spot: float("inf") for row in self.grid for spot in row}
+        f_score[self.start] = self.manhattanheur((self.start.x, self.start.y), (self.end.x, self.end.y))
+        
+        open_set_hash = {self.start}
+
+        while not open_set.empty():
+            current = open_set.get()[2]
+            open_set_hash.remove(current)
+
+            if current == self.end:
+                current = self.end
+                path = []
+                while current != self.start:
+                    path.append(current)
+                    current.set_state_path()
+                    draw_func(current)
+                    current = came_from[current]
+
+                    self.start.set_alt_state("START")
+                    draw_func(self.start)
+                    self.end.set_alt_state("END")
+                    draw_func(self.end)
+                    yield 2
+                break
+            for neighbor in current.neighbors:
+                temp_g_score = g_score[current] + 1
+                if temp_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = temp_g_score
+                    f_score[neighbor] = temp_g_score + self.manhattanheur((neighbor.x, neighbor.y), (self.end.x, self.end.y))
+                    if neighbor not in open_set_hash:
+                        count += 1
+                        open_set.put((f_score[neighbor], count, neighbor))
+                        open_set_hash.add(neighbor)
+                        neighbor.set_state_open()
+                        draw_func(neighbor)
+                        yield 1
+
+            if current != self.start:
+                current.set_state_closed()
+                draw_func(current)
+            
+    def manhattanheur(self, a, b):
+        x1, y1 = a
+        x2, y2 = b
+        return abs(x1 - x2) + abs(y1 - y2)
 
 class Node:
     def __init__(self, pos, grid_side_length):
@@ -222,3 +339,9 @@ class Node:
 
     def set_alt_state(self, state):
         self.altstate = state
+
+    def reset_alt_state(self):
+        self.altstate = self.state
+    
+    def __lt__(a, b):
+        return (a.x, a.y) > (b.x, b.y)

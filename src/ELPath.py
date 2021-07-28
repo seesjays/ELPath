@@ -69,7 +69,8 @@ class ELPath():
             self.sorting_callbacks["set_algorithm"](newalg)
             self.update_info_no_wrapper()
         elif self.mode == "Pathfinding" and newalgmode == self.mode:
-            pass
+            self.pathfinding_callbacks["set_algorithm"](newalg)
+            self.update_info_no_wrapper()
         else:  # mismatch
             self.__unmount()
             self.__mount(newalgmode, newalg)
@@ -90,6 +91,7 @@ class ELPath():
     def __mount_pathing(self, alg):
         self.pathing = PathingWindow()
         self.pathfinding_callbacks = {
+            "set_algorithm": self.pathing.change_algorithm,
             "run_sim": self.run_pathfinding,
             "next_step": self.pathing.next_step,
             "reset": self.pathing.reset,
@@ -131,7 +133,7 @@ class ELPath():
 
         add_text("Speed:", parent="ELPath")
         add_slider_int("step_sleep_slider", label="", parent="ELPath", width=300,
-                       default_value=self.step_sleep, clamped=True, min_value=0, max_value=100)
+                       default_value=self.step_sleep, clamped=True, min_value=0, max_value=50)
 
         add_spacing(parent="ELPath", count=5)
 

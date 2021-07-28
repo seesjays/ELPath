@@ -27,15 +27,20 @@ class PathingWindow:
             "OPEN": [255, 255, 0],
             "CLOSE": [0, 191, 255],
             "PATH": [138, 43, 226],
-            "BARR": [54, 54, 54]
+            "BARR": [54, 54, 54],
+            "SPCL": [255, 165, 0]
         }
         self.message = self.pathing_host.alg_name
 
     def change_algorithm(self):
+        self.retry()
         self.pathing_host.set_algorithm(get_value("algorithm_combobox"))
-        
+        self.message = self.pathing_host.alg_name
+
     def change_algorithm(self, alg):
-            self.pathing_host.set_algorithm(alg)
+        self.retry()
+        self.pathing_host.set_algorithm(alg)
+        self.message = self.pathing_host.alg_name
 
     def draw_node(self, node):
         itag = f"{node.x:02d}"
