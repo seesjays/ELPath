@@ -1,7 +1,9 @@
-from random import randint
+from random import randint, choice
 from time import sleep
 import math
 import queue
+from collections import deque
+
 
 # 7/20/21 - pathingalgs moved into host, for simplicity's sake,
 # and because I don't think generators are the way to go in this case.
@@ -71,20 +73,25 @@ class PathfindingHost:
         node.set_state_start()
         self.start_point = (node.x, node.y)
         self.start = node
+        self.draw_node(self.start)
 
     def remove_start(self):
         start = self.node_from_pos(self.start_point)
         start.set_state_empty()
+        self.draw_node(self.start)
         self.start_point = None
         self.start = None
+        
 
     def add_end(self, node):
         node.set_state_end()
         self.end_point = (node.x, node.y)
         self.end = node
+        self.draw_node(self.end)
 
     def remove_end(self):
         end = self.node_from_pos(self.end_point)
+        self.draw_node(self.start)
         end.set_state_empty()
         self.end_point = None
         self.end = None
@@ -135,6 +142,73 @@ class PathfindingHost:
             return False
         # Notice that we don't return any actual data here, unlike the sorting next_step
         # We do all the window updating work in the algorithm
+
+    def rand_maze(self):
+        def emptys_at_dist_2(node):
+            right = self.node_from_pos((node.x+2, node.y))
+            left = self.node_from_pos((node.x-2, node.y))
+            up = self.node_from_pos((node.x, node.y+2))
+            down = self.node_from_pos((node.x, node.y-2))
+
+            outlist = []
+            if right is not None and right.state == "EMPTY":
+                outlist.append(right)
+            if left is not None and left.state == "EMPTY":
+                outlist.append(left)
+            if up is not None and up.state == "EMPTY":
+                outlist.append(up)
+            if down is not None and down.state == "EMPTY":
+                outlist.append(down)
+
+            return outlist
+            
+        open_nodes = []
+        self.remove_end()
+        self.remove_start()
+        for row in self.grid:
+            for node in row:
+                node.set_state_barrier()
+                self.draw_node(node)
+
+        for i in range(1, len(self.grid)-1, 2):
+            for j in range(1, len(self.grid)-1, 2):
+                node = self.grid[i][j]
+                node.set_state_empty()
+                self.draw_node(node)
+                open_nodes.append(node)
+
+        visited = set()
+        stack = deque()
+        startcell = choice(open_nodes)
+        visited.add(startcell)
+        stack.append(startcell)
+        self.add_start(startcell)
+
+        while len(stack) > 0:
+            current_cell = stack.pop()
+            neighbors = emptys_at_dist_2(current_cell)
+            
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    stack.append(current_cell)
+
+                    unvis = choice(neighbors)
+                    while (unvis in visited):
+                        unvis = choice(neighbors)
+
+                    between = ((unvis.x + current_cell.x)//2, (unvis.y + current_cell.y)//2)
+                    between = self.node_from_pos(between)
+
+                    between.set_state_empty()
+                    self.draw_node(between)
+
+                    visited.add(unvis)
+                    stack.append(unvis)
+                    sleep(0.0001)
+                    break
+
+            if len(stack) == 0:
+                self.add_end(neighbors[0])
 
     # algs
     def breadthfirst(self, draw_func):

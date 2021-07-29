@@ -10,7 +10,7 @@ from math import trunc
 class PathingWindow:
     def __init__(self):
         self.window_size = 800
-        self.side_cell_count = 40
+        self.side_cell_count = 41
         self.cell_size = self.window_size/self.side_cell_count
 
         self.min_x = 0

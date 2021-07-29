@@ -91,6 +91,7 @@ class ELPath():
     def __mount_pathing(self, alg):
         self.pathing = PathingWindow()
         self.pathfinding_callbacks = {
+            "generate_maze": self.pathing.pathing_host.rand_maze,
             "set_algorithm": self.pathing.change_algorithm,
             "run_sim": self.run_pathfinding,
             "next_step": self.pathing.next_step,
@@ -170,6 +171,8 @@ class ELPath():
         add_spacing(parent="ELPath", count=5)
 
         add_text("Maze:", parent="ELPath")
+        add_button("random_maze", label="Random Maze",
+                   parent="ELPath", callback=self.pathfinding_callbacks["generate_maze"])
         add_button("retry_button", label="Retry Maze",
                    parent="ELPath", callback=self.pathfinding_callbacks["retry"])
         add_button("reset_button", label="Reset",
