@@ -106,6 +106,9 @@ class PathingWindow:
             self.update_node(node)
 
     def next_step(self):
+        if not self.pathing_host.start or not self.pathing_host.end:
+            return False
+
         if not self.pathing_host.initialized:
             self.pathing_host.initialize_neighbors()
             set_mouse_down_callback(None)
@@ -125,6 +128,11 @@ class PathingWindow:
         for row in self.pathing_host.grid:
             for node in row:
                 self.draw_node(node)
+
+    def randmaze(self):
+        self.pathing_host.reinit_maze()
+        self.pathing_host.rand_maze() #drawing is handled in-alg      
+        set_mouse_down_callback(self.cell_clicked)
 
     def unmount(self):
         delete_item("grid", children_only=False)

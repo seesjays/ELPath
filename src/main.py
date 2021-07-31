@@ -1,6 +1,6 @@
 from dearpygui.core import *
 from dearpygui.simple import *
-from consts impowbrt *
+from consts import *
 from ELPath import *
 
 ELPath = ELPath()

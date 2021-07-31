@@ -3,6 +3,7 @@ from time import sleep
 import math
 import queue
 from collections import deque
+from typing import Type
 
 
 # 7/20/21 - pathingalgs moved into host, for simplicity's sake,
@@ -45,9 +46,8 @@ class PathfindingHost:
 
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
-            "Dijkstra's Algorithm": (lambda: self.dijkstra(self.draw_node)),
+            "Dijkstra's Algorithm": (lambda: self.dijkstras(self.draw_node)),
             "A* Algorithm": (lambda: self.astar(self.draw_node)),
-
         }
         self.alg_name = algorithm
         self.current_algorithm = self.alg_list[self.alg_name]
@@ -91,8 +91,8 @@ class PathfindingHost:
 
     def remove_end(self):
         end = self.node_from_pos(self.end_point)
-        self.draw_node(self.start)
         end.set_state_empty()
+        self.draw_node(self.end)
         self.end_point = None
         self.end = None
 
@@ -128,15 +128,25 @@ class PathfindingHost:
             for node in row:
                 node.neighbors = []
                 node.state = node.altstate = node.origstate
-        self.add_start(self.node_from_pos(self.start_point))
-        self.add_end(self.node_from_pos(self.end_point))
+
+        # start/end not placed
+        try:
+            self.add_start(self.node_from_pos(self.start_point))
+        except TypeError: #start/end not initialized
+            pass
+        try:
+            self.add_end(self.node_from_pos(self.end_point))
+        except TypeError: #start/end not initialized
+            pass
+
         self.initialized = False
         self.current_algorithm = self.alg_list[self.alg_name]
 
     def next_step(self):
         try:
             self.step_counter += 1
-            return next(self.current_algorithm)
+            next(self.current_algorithm)
+            return True
         except StopIteration:
             self.step_counter -= 1
             return False
@@ -161,32 +171,40 @@ class PathfindingHost:
                 outlist.append(down)
 
             return outlist
+        if self.start is not None:
+            self.remove_start()
+        if self.end is not None:
+            self.remove_end()
             
-        open_nodes = []
-        self.remove_end()
-        self.remove_start()
         for row in self.grid:
             for node in row:
                 node.set_state_barrier()
                 self.draw_node(node)
-
-        for i in range(1, len(self.grid)-1, 2):
-            for j in range(1, len(self.grid)-1, 2):
+        
+        open_nodes = []
+        for i in range(1, len(self.grid)-1):
+            for j in range(1, len(self.grid)-1):
                 node = self.grid[i][j]
-                node.set_state_empty()
-                self.draw_node(node)
-                open_nodes.append(node)
+                if i%2 != 0 and j%2 != 0:
+                    node.set_state_empty()
+                    self.draw_node(node)
+                    open_nodes.append(node)
 
         visited = set()
         stack = deque()
         startcell = choice(open_nodes)
         visited.add(startcell)
         stack.append(startcell)
-        self.add_start(startcell)
+
+        sleep_tracker = 0
 
         while len(stack) > 0:
             current_cell = stack.pop()
             neighbors = emptys_at_dist_2(current_cell)
+
+            prevstate = current_cell.state
+            current_cell.set_state_closed()
+            self.draw_node(current_cell)
             
             for neighbor in neighbors:
                 if neighbor not in visited:
@@ -204,11 +222,16 @@ class PathfindingHost:
 
                     visited.add(unvis)
                     stack.append(unvis)
-                    sleep(0.0001)
                     break
 
-            if len(stack) == 0:
-                self.add_end(neighbors[0])
+            sleep_tracker += 1
+            if sleep_tracker == 10:
+                sleep_tracker = 0
+                sleep(0.1)
+
+            current_cell.set_state(prevstate)
+            self.draw_node(current_cell)
+
 
     # algs
     def breadthfirst(self, draw_func):
@@ -230,29 +253,28 @@ class PathfindingHost:
                 draw_func(self.end)
                 break
 
-            
+            highlight_list = []
             for nxt in current.neighbors:
-                nxt.set_state_open()
-                draw_func(nxt)
-                yield 1
-
                 if nxt not in came_from:
+                    nxt.set_state_open()
+                    highlight_list.append(nxt)
                     frontier.put(nxt)
                     came_from[nxt] = current
-
-                nxt.set_state_closed()
                 draw_func(nxt)
-                
-            current.reset_alt_state()
-                                
+            yield 1           
+
+            for node in highlight_list:
+                node.set_state_closed()
+                draw_func(node)
+            
+            current.reset_alt_state()                    
             current.set_state_closed()
             draw_func(current)
+
             self.start.set_alt_state("START")
             draw_func(self.start)
             self.end.set_alt_state("END")
             draw_func(self.end)
-
-            yield 1
 
         current = self.end
         path = []
@@ -268,44 +290,63 @@ class PathfindingHost:
             draw_func(self.end)
             yield 2
 
-    def dijkstra(self, draw_func):
-        frontier = queue.PriorityQueue()
-        frontier.put(self.start, 0)
-        came_from = dict()
-        cost_so_far = dict()
-        came_from[self.start] = None
-        cost_so_far[self.start] = 0
+    def dijkstras(self, draw_func):
+        vertset = []
+        distances = {}
+        prev = {}
 
-        while not frontier.empty():
-            current = frontier.get()
-            current.set_alt_state("SPCL")
-            draw_func(current)
-            yield 1
-            if current == self.end:
+        for row in self.grid:
+            for node in row:
+                distances[node] = float("inf")
+                prev[node] = None
+                vertset.append(node)
+
+        initial_node = self.start
+        distances[initial_node] = 0
+        
+        while len(vertset) > 0:
+            tempmin = None
+            lowest = None
+            for thing in vertset:
+                if tempmin is None or distances[thing] < tempmin:
+                    tempmin = distances[thing]
+                    lowest = thing
+
+
+            vertset.remove(lowest)
+            lowest.set_state_closed()
+            draw_func(lowest)
+
+            if lowest == self.end:
                 break
-            for nxt in current.neighbors:
-                nxt.set_state_open()
-                draw_func(nxt)
-                new_cost = cost_so_far[current] + self.cost(current, nxt)
-                if nxt not in cost_so_far or new_cost < cost_so_far[nxt]:
-                    cost_so_far[nxt] = new_cost
-                    priority = new_cost    
-                    frontier.put(nxt, priority)
-                    came_from[nxt] = current
+
+            for neighbor in lowest.neighbors:
+                if neighbor in vertset:
+                    alt = distances[lowest] + 1 # nodes don't have weights
+                    if alt < distances[neighbor]:
+                        distances[neighbor] = alt
+                        prev[neighbor] = lowest
+
+                    neighbor.set_alt_state("SPCL")
+                    draw_func(neighbor)
+                    yield 1
+                    neighbor.reset_alt_state()
+                    draw_func(neighbor)
+
                 self.start.set_alt_state("START")
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
-                yield 1
-            current.set_state_open()
-            draw_func(current)
+
+            yield 1
+
         current = self.end
         path = []
         while current != self.start:
             path.append(current)
             current.set_state_path()
             draw_func(current)
-            current = came_from[current]
+            current = prev[current]
 
             self.start.set_alt_state("START")
             draw_func(self.start)
@@ -389,6 +430,9 @@ class Node:
 
     def get_state(self):
         return self.state
+
+    def set_state(self, state):
+        self.altstate = self.state = state
 
     def set_state_start(self):
         self.altstate = self.state = "START"

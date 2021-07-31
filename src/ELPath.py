@@ -91,7 +91,7 @@ class ELPath():
     def __mount_pathing(self, alg):
         self.pathing = PathingWindow()
         self.pathfinding_callbacks = {
-            "generate_maze": self.pathing.pathing_host.rand_maze,
+            "generate_maze": self.pathing.randmaze,
             "set_algorithm": self.pathing.change_algorithm,
             "run_sim": self.run_pathfinding,
             "next_step": self.pathing.next_step,
