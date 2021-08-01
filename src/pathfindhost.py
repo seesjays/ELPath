@@ -23,7 +23,7 @@ That's what drove this decision.
 
 
 class PathfindingHost:
-    def __init__(self, sidecellcount, draw_node_func, algorithm="Breadth-First Search"):
+    def __init__(self, sidecellcount, draw_node_func, draw_weights_func, algorithm="Breadth-First Search"):
         self.sidecellcount = sidecellcount
 
         self.grid = []
@@ -43,6 +43,7 @@ class PathfindingHost:
         self.end.set_state_end()
 
         self.draw_node = draw_node_func
+        self.draw_weights = draw_weights_func
 
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
@@ -81,7 +82,6 @@ class PathfindingHost:
         self.draw_node(self.start)
         self.start_point = None
         self.start = None
-        
 
     def add_end(self, node):
         node.set_state_end()
@@ -132,11 +132,11 @@ class PathfindingHost:
         # start/end not placed
         try:
             self.add_start(self.node_from_pos(self.start_point))
-        except TypeError: #start/end not initialized
+        except TypeError:  # start/end not initialized
             pass
         try:
             self.add_end(self.node_from_pos(self.end_point))
-        except TypeError: #start/end not initialized
+        except TypeError:  # start/end not initialized
             pass
 
         self.initialized = False
@@ -175,17 +175,17 @@ class PathfindingHost:
             self.remove_start()
         if self.end is not None:
             self.remove_end()
-            
+
         for row in self.grid:
             for node in row:
                 node.set_state_barrier()
                 self.draw_node(node)
-        
+
         open_nodes = []
         for i in range(1, len(self.grid)-1):
             for j in range(1, len(self.grid)-1):
                 node = self.grid[i][j]
-                if i%2 != 0 and j%2 != 0:
+                if i % 2 != 0 and j % 2 != 0:
                     node.set_state_empty()
                     self.draw_node(node)
                     open_nodes.append(node)
@@ -205,7 +205,7 @@ class PathfindingHost:
             prevstate = current_cell.state
             current_cell.set_state_closed()
             self.draw_node(current_cell)
-            
+
             for neighbor in neighbors:
                 if neighbor not in visited:
                     stack.append(current_cell)
@@ -214,7 +214,8 @@ class PathfindingHost:
                     while (unvis in visited):
                         unvis = choice(neighbors)
 
-                    between = ((unvis.x + current_cell.x)//2, (unvis.y + current_cell.y)//2)
+                    between = ((unvis.x + current_cell.x)//2,
+                               (unvis.y + current_cell.y)//2)
                     between = self.node_from_pos(between)
 
                     between.set_state_empty()
@@ -232,6 +233,13 @@ class PathfindingHost:
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
 
+    def rand_weights(self):
+        # Generates a random list of weights for each node - to help along Dijkstras's
+        weightlevels = [10, 20, 40, 80, 160, 240]
+        weightlist = {node: choice(weightlevels)
+                      for row in self.grid for node in row if
+                      node.state != "START" and node.state != "END" and node.state != "BARR"}
+        return weightlist
 
     # algs
     def breadthfirst(self, draw_func):
@@ -261,13 +269,13 @@ class PathfindingHost:
                     frontier.put(nxt)
                     came_from[nxt] = current
                 draw_func(nxt)
-            yield 1           
+            yield 1
 
             for node in highlight_list:
                 node.set_state_closed()
                 draw_func(node)
-            
-            current.reset_alt_state()                    
+
+            current.reset_alt_state()
             current.set_state_closed()
             draw_func(current)
 
@@ -291,6 +299,9 @@ class PathfindingHost:
             yield 2
 
     def dijkstras(self, draw_func):
+        weights = self.rand_weights()
+        self.draw_weights(weights)
+
         vertset = []
         distances = {}
         prev = {}
@@ -303,7 +314,7 @@ class PathfindingHost:
 
         initial_node = self.start
         distances[initial_node] = 0
-        
+
         while len(vertset) > 0:
             tempmin = None
             lowest = None
@@ -311,7 +322,6 @@ class PathfindingHost:
                 if tempmin is None or distances[thing] < tempmin:
                     tempmin = distances[thing]
                     lowest = thing
-
 
             vertset.remove(lowest)
             lowest.set_state_closed()
@@ -322,7 +332,8 @@ class PathfindingHost:
 
             for neighbor in lowest.neighbors:
                 if neighbor in vertset:
-                    alt = distances[lowest] + 1 # nodes don't have weights
+                    # nodes don't have weights
+                    alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
                         distances[neighbor] = alt
                         prev[neighbor] = lowest
@@ -362,8 +373,9 @@ class PathfindingHost:
         g_score = {spot: float("inf") for row in self.grid for spot in row}
         g_score[self.start] = 0
         f_score = {spot: float("inf") for row in self.grid for spot in row}
-        f_score[self.start] = self.manhattanheur((self.start.x, self.start.y), (self.end.x, self.end.y))
-        
+        f_score[self.start] = self.manhattanheur(
+            (self.start.x, self.start.y), (self.end.x, self.end.y))
+
         open_set_hash = {self.start}
 
         while not open_set.empty():
@@ -390,7 +402,8 @@ class PathfindingHost:
                 if temp_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = temp_g_score
-                    f_score[neighbor] = temp_g_score + self.manhattanheur((neighbor.x, neighbor.y), (self.end.x, self.end.y))
+                    f_score[neighbor] = temp_g_score + self.manhattanheur(
+                        (neighbor.x, neighbor.y), (self.end.x, self.end.y))
                     if neighbor not in open_set_hash:
                         count += 1
                         open_set.put((f_score[neighbor], count, neighbor))
@@ -402,11 +415,23 @@ class PathfindingHost:
             if current != self.start:
                 current.set_state_closed()
                 draw_func(current)
-            
+
+    def depthfirst(self, draw_func):
+        discovered = []
+        discovered.append(self.start)
+        node = self.start
+        def procedure(nde):
+            discovered.append(nde)
+            for neighbor in nde:
+                if neighbor not in discovered:
+                    yield from procedure(neighbor)
+
+
     def manhattanheur(self, a, b):
         x1, y1 = a
         x2, y2 = b
         return abs(x1 - x2) + abs(y1 - y2)
+
 
 class Node:
     def __init__(self, pos, grid_side_length):
@@ -460,6 +485,6 @@ class Node:
 
     def reset_alt_state(self):
         self.altstate = self.state
-    
+
     def __lt__(a, b):
         return (a.x, a.y) > (b.x, b.y)

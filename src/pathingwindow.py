@@ -19,7 +19,7 @@ class PathingWindow:
         self.max_y = 800
 
         self.pathing_host = PathfindingHost(
-            self.side_cell_count, lambda node: self.update_node(node))
+            self.side_cell_count, lambda node: self.update_node(node), self.draw_weights)
         self.colors = {
             "EMPTY": [255, 255, 255],
             "START": [127, 255, 0],
@@ -48,6 +48,14 @@ class PathingWindow:
         draw_rectangle("grid", [self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(node.x+1)*self.cell_size, (node.y+1)*self.cell_size], [
             34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
+    def draw_weights(self, weightlist):
+            for node in weightlist:
+                weightednode = weightlist[node] + 10
+                itag = f"{node.x:02d}"
+                jtag = f"{node.y:02d}"
+                modify_draw_command(
+                    "grid", f"{itag}{jtag}", fill=[weightednode, weightednode, weightednode])
+            
     def update_node(self, node):
         itag = f"{node.x:02d}"
         jtag = f"{node.y:02d}"
