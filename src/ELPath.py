@@ -219,6 +219,7 @@ class ELPath():
         configure_item("reset_button", enabled=True)
 
 
+    # Info
     def update_info(self, func):
         def wrapper():
             func()
@@ -228,3 +229,8 @@ class ELPath():
 
     def update_info_no_wrapper(self):
         set_value("alginfo", self.curr_window.message)
+
+    def update_info_alg_definition(self):
+        set_value("alginfo", self.curr_window.definition)
+
+
