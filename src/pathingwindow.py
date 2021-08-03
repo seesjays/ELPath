@@ -113,6 +113,7 @@ class PathingWindow:
 
             self.update_node(node)
 
+    # interfacing with ELPath
     def next_step(self):
         if not self.pathing_host.start or not self.pathing_host.end:
             return False
@@ -145,4 +146,7 @@ class PathingWindow:
     def unmount(self):
         delete_item("grid", children_only=False)
         self.pathing_host = None
+
+    def current_alg(self):
+        return self.pathing_host.alg_name
 

@@ -5,6 +5,7 @@ from algohost import AlgorithmHost
 from algowindow import AlgorithmWindow
 import consts as cnsts
 from pathingwindow import PathingWindow
+import definitions as defs
 
 
 class ELPath():
@@ -231,6 +232,7 @@ class ELPath():
         set_value("alginfo", self.curr_window.message)
 
     def update_info_alg_definition(self):
+        defs.DEFINITIONS[self.curr_window.current_alg()]
         set_value("alginfo", self.curr_window.definition)
 
 

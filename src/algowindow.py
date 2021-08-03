@@ -6,7 +6,6 @@ import consts as cnsts
 from random import randint
 from time import sleep
 
-
 class AlgorithmWindow:
     def __init__(self):
         self.algorithms_host = AlgorithmHost()
@@ -118,4 +117,7 @@ class AlgorithmWindow:
     def unmount(self):
         delete_item("Algorithm")
         self.algorithms_host = None
+
+    def current_alg(self):
+        return self.algorithms_host.alg_name
         
