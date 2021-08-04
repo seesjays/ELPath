@@ -47,6 +47,7 @@ class PathfindingHost:
 
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
+            "Depth-First Search": (lambda: self.depthfirst(self.draw_node)),
             "Dijkstra's Algorithm": (lambda: self.dijkstras(self.draw_node)),
             "A* Algorithm": (lambda: self.astar(self.draw_node)),
         }
@@ -128,6 +129,7 @@ class PathfindingHost:
             for node in row:
                 node.neighbors = []
                 node.state = node.altstate = node.origstate
+                self.draw_node(node)
 
         # start/end not placed
         try:
@@ -228,7 +230,7 @@ class PathfindingHost:
             sleep_tracker += 1
             if sleep_tracker == 10:
                 sleep_tracker = 0
-                sleep(0.1)
+                #sleep(0.1)
 
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
@@ -239,6 +241,9 @@ class PathfindingHost:
         weightlist = {node: choice(weightlevels)
                       for row in self.grid for node in row if
                       node.state != "START" and node.state != "END" and node.state != "BARR"}
+        weightlist[self.start] = 0
+        weightlist[self.end] = 0
+
         return weightlist
 
     # algs
@@ -298,6 +303,38 @@ class PathfindingHost:
             draw_func(self.end)
             yield 2
 
+    def depthfirst(self, draw_func):
+        stack = []
+        discovered = set()
+        stack.append(self.start)
+        while len(stack) > 0:
+            vert = stack.pop()
+            vert.set_alt_state("SPCL")
+            draw_func(vert)
+            if vert not in discovered:
+                highlight_list = []
+                discovered.add(vert)
+                for neighbor in vert.neighbors:
+                    if neighbor not in discovered:
+                        stack.append(neighbor)
+                        highlight_list.append(neighbor)
+                        neighbor.set_state_open()
+                        draw_func(neighbor)
+
+                    self.start.set_alt_state("START")
+                    draw_func(self.start)
+                    self.end.set_alt_state("END")
+                    draw_func(self.end)
+                
+                yield 1
+
+            for node in highlight_list:
+                node.set_state_closed()
+                draw_func(node)
+            
+            vert.set_state_closed()
+            draw_func(vert)
+
     def dijkstras(self, draw_func):
         weights = self.rand_weights()
         self.draw_weights(weights)
@@ -324,30 +361,34 @@ class PathfindingHost:
                     lowest = thing
 
             vertset.remove(lowest)
-            lowest.set_state_closed()
+            lowest.set_alt_state("SPCL")
             draw_func(lowest)
 
             if lowest == self.end:
                 break
+            
+            highlight_list = []
 
             for neighbor in lowest.neighbors:
                 if neighbor in vertset:
-                    # nodes don't have weights
                     alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
                         distances[neighbor] = alt
                         prev[neighbor] = lowest
-
-                    neighbor.set_alt_state("SPCL")
+                    highlight_list.append(neighbor)
+                    neighbor.set_state_open()
                     draw_func(neighbor)
-                    yield 1
-                    neighbor.reset_alt_state()
-                    draw_func(neighbor)
-
                 self.start.set_alt_state("START")
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
+                yield 1                
+
+            for node in highlight_list:
+                node.set_state_closed()
+                draw_func(node)
+            lowest.set_state_closed()
+            draw_func(lowest)
 
             yield 1
 
@@ -415,17 +456,6 @@ class PathfindingHost:
             if current != self.start:
                 current.set_state_closed()
                 draw_func(current)
-
-    def depthfirst(self, draw_func):
-        discovered = []
-        discovered.append(self.start)
-        node = self.start
-        def procedure(nde):
-            discovered.append(nde)
-            for neighbor in nde:
-                if neighbor not in discovered:
-                    yield from procedure(neighbor)
-
 
     def manhattanheur(self, a, b):
         x1, y1 = a
