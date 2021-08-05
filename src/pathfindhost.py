@@ -123,8 +123,9 @@ class PathfindingHost:
         self.initialized = True
         self.current_algorithm = self.current_algorithm()
 
-    def reinit_maze(self):
+    def retry_maze(self):
         self.step_counter = 0
+
         for row in self.grid:
             for node in row:
                 node.neighbors = []
@@ -134,12 +135,16 @@ class PathfindingHost:
         # start/end not placed
         try:
             self.add_start(self.node_from_pos(self.start_point))
-        except TypeError:  # start/end not initialized
-            pass
-        try:
             self.add_end(self.node_from_pos(self.end_point))
         except TypeError:  # start/end not initialized
-            pass
+            self.start_point = (0, 0)
+            self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
+
+            self.start = self.node_from_pos(self.start_point)
+            self.end = self.node_from_pos(self.end_point)
+
+            self.add_start(self.node_from_pos(self.start_point))
+            self.add_end(self.node_from_pos(self.end_point))
 
         self.initialized = False
         self.current_algorithm = self.alg_list[self.alg_name]
@@ -194,9 +199,13 @@ class PathfindingHost:
 
         visited = set()
         stack = deque()
+        
         startcell = choice(open_nodes)
         visited.add(startcell)
         stack.append(startcell)
+
+        self.add_start(startcell)
+        self.add_end(choice(open_nodes))
 
         sleep_tracker = 0
 

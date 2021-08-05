@@ -126,20 +126,16 @@ class PathingWindow:
     def reset(self):
         delete_item("grid")
         self.pathing_host = PathfindingHost(
-            self.side_cell_count, lambda node: self.update_node(node))
+            self.side_cell_count, lambda node: self.update_node(node), self.draw_weights)
         self.initialize_grid()
         set_mouse_down_callback(self.cell_clicked)
 
     def retry(self):
-        self.pathing_host.reinit_maze()
-        clear_drawing("grid")
+        self.pathing_host.retry_maze()
         set_mouse_down_callback(self.cell_clicked)
-        for row in self.pathing_host.grid:
-            for node in row:
-                self.draw_node(node)
 
     def randmaze(self):
-        self.pathing_host.reinit_maze()
+        clear_drawing("grid")
         self.pathing_host.rand_maze() #drawing is handled in-alg      
         set_mouse_down_callback(self.cell_clicked)
 
