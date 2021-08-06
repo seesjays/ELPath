@@ -135,7 +135,6 @@ class PathingWindow:
         set_mouse_down_callback(self.cell_clicked)
 
     def randmaze(self):
-        clear_drawing("grid")
         self.pathing_host.rand_maze() #drawing is handled in-alg      
         set_mouse_down_callback(self.cell_clicked)
 

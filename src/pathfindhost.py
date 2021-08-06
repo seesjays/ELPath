@@ -80,7 +80,7 @@ class PathfindingHost:
     def remove_start(self):
         start = self.node_from_pos(self.start_point)
         start.set_state_empty()
-        self.draw_node(self.start)
+        self.draw_node(start)
         self.start_point = None
         self.start = None
 
@@ -93,7 +93,7 @@ class PathfindingHost:
     def remove_end(self):
         end = self.node_from_pos(self.end_point)
         end.set_state_empty()
-        self.draw_node(self.end)
+        self.draw_node(end)
         self.end_point = None
         self.end = None
 
@@ -199,13 +199,12 @@ class PathfindingHost:
 
         visited = set()
         stack = deque()
-        
+
         startcell = choice(open_nodes)
         visited.add(startcell)
         stack.append(startcell)
 
         self.add_start(startcell)
-        self.add_end(choice(open_nodes))
 
         sleep_tracker = 0
 
@@ -239,10 +238,11 @@ class PathfindingHost:
             sleep_tracker += 1
             if sleep_tracker == 10:
                 sleep_tracker = 0
-                #sleep(0.1)
+                # sleep(0.1)
 
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
+        self.add_end(choice(open_nodes))
 
     def rand_weights(self):
         # Generates a random list of weights for each node - to help along Dijkstras's
@@ -334,13 +334,13 @@ class PathfindingHost:
                     draw_func(self.start)
                     self.end.set_alt_state("END")
                     draw_func(self.end)
-                
+
                 yield 1
 
             for node in highlight_list:
                 node.set_state_closed()
                 draw_func(node)
-            
+
             vert.set_state_closed()
             draw_func(vert)
 
@@ -375,7 +375,7 @@ class PathfindingHost:
 
             if lowest == self.end:
                 break
-            
+
             highlight_list = []
 
             for neighbor in lowest.neighbors:
@@ -391,7 +391,7 @@ class PathfindingHost:
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
-                yield 1                
+                yield 1
 
             for node in highlight_list:
                 node.set_state_closed()
@@ -477,15 +477,12 @@ class Node:
         self.x, self.y = pos
         self.state = "EMPTY"
         self.altstate = "EMPTY"
+        self.origstate = "EMPTY"
         # altstate is a way to keep nodes from changing color when they're drawn
         # For example, it would be reasonable to have the start node always be green,
         # even when added to the closed set of an algorithm.
         # Thus, in such cases, it makes sense to maintain the actual state
         # but use altstate as a facade of sorts, to clearly visualize what's necessary.
-
-        self.origstate = "EMPTY"
-        # origstate is so we can reinitialize the maze for retries on grid initialization
-        # just keeps track of it's original state before grid initialization
         self.neighbors = []
         self.sidecount = grid_side_length
 
@@ -499,10 +496,10 @@ class Node:
         self.altstate = self.state = state
 
     def set_state_start(self):
-        self.altstate = self.state = "START"
+        self.origstate = self.altstate = self.state = "START"
 
     def set_state_end(self):
-        self.altstate = self.state = "END"
+        self.origstate = self.altstate = self.state = "END"
 
     def set_state_open(self):
         self.altstate = self.state = "OPEN"
@@ -514,10 +511,10 @@ class Node:
         self.altstate = self.state = "PATH"
 
     def set_state_empty(self):
-        self.altstate = self.state = "EMPTY"
+        self.origstate = self.altstate = self.state = "EMPTY"
 
     def set_state_barrier(self):
-        self.altstate = self.state = "BARR"
+        self.origstate = self.altstate = self.state = "BARR"
 
     def set_alt_state(self, state):
         self.altstate = state
