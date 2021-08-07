@@ -49,12 +49,12 @@ class PathingWindow:
             34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
     def draw_weights(self, weightlist):
-            for node in weightlist:
-                weightednode = weightlist[node] + 10
-                itag = f"{node.x:02d}"
-                jtag = f"{node.y:02d}"
-                modify_draw_command(
-                    "grid", f"{itag}{jtag}", fill=[weightednode, weightednode, weightednode])
+        for node in weightlist:
+            weightednode = weightlist[node] + 10
+            itag = f"{node.x:02d}"
+            jtag = f"{node.y:02d}"
+            modify_draw_command(
+                "grid", f"{itag}{jtag}", fill=[weightednode, weightednode, weightednode])
             
     def update_node(self, node):
         itag = f"{node.x:02d}"
@@ -124,9 +124,10 @@ class PathingWindow:
         return self.pathing_host.next_step()
 
     def reset(self):
+        curr_alg_name = self.pathing_host.alg_name
         delete_item("grid")
         self.pathing_host = PathfindingHost(
-            self.side_cell_count, lambda node: self.update_node(node), self.draw_weights)
+            self.side_cell_count, lambda node: self.update_node(node), self.draw_weights, algorithm=curr_alg_name)
         self.initialize_grid()
         set_mouse_down_callback(self.cell_clicked)
 
