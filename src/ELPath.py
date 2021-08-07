@@ -203,8 +203,10 @@ class ELPath():
     def run_pathfinding(self, sender):
         configure_item("algorithm_combobox", enabled=False)
         configure_item("next_step_button", enabled=False)
+        configure_item("random_maze", enabled=False)
         configure_item("retry_button", enabled=False)
         configure_item("reset_button", enabled=False)
+
 
         while get_value(sender):
             updated = self.pathing.next_step()
@@ -216,6 +218,7 @@ class ELPath():
 
         configure_item("algorithm_combobox", enabled=True)
         configure_item("next_step_button", enabled=True)
+        configure_item("random_maze", enabled=True)
         configure_item("retry_button", enabled=True)
         configure_item("reset_button", enabled=True)
 

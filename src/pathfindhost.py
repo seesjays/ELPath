@@ -246,7 +246,7 @@ class PathfindingHost:
 
     def rand_weights(self):
         # Generates a random list of weights for each node - to help along Dijkstras's
-        weightlevels = [10, 20, 40, 80, 160, 240]
+        weightlevels = [20, 200]
         weightlist = {node: choice(weightlevels)
                       for row in self.grid for node in row if
                       node.state != "START" and node.state != "END" and node.state != "BARR"}
@@ -275,19 +275,13 @@ class PathfindingHost:
                 draw_func(self.end)
                 break
 
-            highlight_list = []
             for nxt in current.neighbors:
                 if nxt not in came_from:
                     nxt.set_state_open()
-                    highlight_list.append(nxt)
                     frontier.put(nxt)
                     came_from[nxt] = current
                 draw_func(nxt)
             yield 1
-
-            for node in highlight_list:
-                node.set_state_closed()
-                draw_func(node)
 
             current.reset_alt_state()
             current.set_state_closed()
@@ -316,19 +310,30 @@ class PathfindingHost:
         stack = []
         discovered = set()
         stack.append(self.start)
+        came_from = dict()
+
         while len(stack) > 0:
             vert = stack.pop()
             vert.set_alt_state("SPCL")
             draw_func(vert)
+
+            if vert == self.end:
+                self.start.set_alt_state("START")
+                draw_func(self.start)
+                self.end.set_alt_state("END")
+                draw_func(self.end)
+                break
+
             if vert not in discovered:
-                highlight_list = []
                 discovered.add(vert)
                 for neighbor in vert.neighbors:
                     if neighbor not in discovered:
                         stack.append(neighbor)
-                        highlight_list.append(neighbor)
                         neighbor.set_state_open()
                         draw_func(neighbor)
+                        if neighbor not in came_from:
+                            came_from[neighbor] = vert
+
 
                     self.start.set_alt_state("START")
                     draw_func(self.start)
@@ -337,12 +342,22 @@ class PathfindingHost:
 
                 yield 1
 
-            for node in highlight_list:
-                node.set_state_closed()
-                draw_func(node)
-
             vert.set_state_closed()
             draw_func(vert)
+        
+        current = self.end
+        path = []
+        while current != self.start:
+            path.append(current)
+            current.set_state_path()
+            draw_func(current)
+            current = came_from[current]
+
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+            yield 2
 
     def dijkstras(self, draw_func):
         weights = self.rand_weights()
@@ -376,26 +391,21 @@ class PathfindingHost:
             if lowest == self.end:
                 break
 
-            highlight_list = []
-
             for neighbor in lowest.neighbors:
                 if neighbor in vertset:
                     alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
                         distances[neighbor] = alt
                         prev[neighbor] = lowest
-                    highlight_list.append(neighbor)
                     neighbor.set_state_open()
                     draw_func(neighbor)
+
                 self.start.set_alt_state("START")
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
                 yield 1
 
-            for node in highlight_list:
-                node.set_state_closed()
-                draw_func(node)
             lowest.set_state_closed()
             draw_func(lowest)
 

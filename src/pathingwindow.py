@@ -49,12 +49,13 @@ class PathingWindow:
             34, 36, 37, 255],  fill=self.colors[node.state], rounding=2, thickness=1, tag=f"{itag}{jtag}")
 
     def draw_weights(self, weightlist):
+        # higher weights cost more, so make those less green - increase the tint of the color 
         for node in weightlist:
             weightednode = weightlist[node] + 10
             itag = f"{node.x:02d}"
             jtag = f"{node.y:02d}"
             modify_draw_command(
-                "grid", f"{itag}{jtag}", fill=[weightednode, weightednode, weightednode])
+                "grid", f"{itag}{jtag}", fill=[weightednode, 255, weightednode])
             
     def update_node(self, node):
         itag = f"{node.x:02d}"
@@ -136,7 +137,8 @@ class PathingWindow:
         set_mouse_down_callback(self.cell_clicked)
 
     def randmaze(self):
-        self.pathing_host.rand_maze() #drawing is handled in-alg      
+        self.pathing_host.rand_maze() #drawing is handled in-alg    
+        self.pathing_host.retry_maze()
         set_mouse_down_callback(self.cell_clicked)
 
     def unmount(self):
