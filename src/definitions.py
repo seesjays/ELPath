@@ -68,15 +68,42 @@ DEFINITIONS = {
     # pathing
     "Breadth-First Search": [
         "Graph Search", 
-        ["Best and worst case: O(|V| + |E|)"]
+        ["Best and worst case: O(|V| + |E|)"],
+        """
+        Breadth-First Search operates by examining all nodes at each depth
+        before moving on to the next level. For each node, its (unexamined) neighbors are added
+        onto a queue to be examined later.
+        """
+    ],
+
+    "Depth-First Search": [
+        "Graph Search", 
+        ["Best and worst case: O(|V| + |E|)"],
+        """
+        Depth-First Search operates by examining all nodes along a branch before moving on
+        to the next branch. It utilizes a stack to keep track of which nodes are to be scanned next.
+        """
     ],
 
     "Dijkstra's Algorithm": [
         "Graph Search",
-        ["Best and worst case: O((|V| + |E|) log |V|)"]
+        ["Best and worst case: O((|V| + |E|) log |V|)"],
+        """
+        One of the more informed algorithms, Dijkstra's functions using a graph with weighted edges, finding
+        the lowest-cost path to an objective by scanning the neighbors around a node for the next node with the lowest weight.
+        NOTE: There is currently no way to manually set weights in ELPath, so to stay true to the demonstration,
+        a randomized weight list is used. (Without weights, Dijkstra's functions similarly to Depth-First Search)
+        """
     ],
 
     "A* Algorithm": [
         "Graph Search",
-        ["Time complexity depends on the heuristic used to calculate the distance from the end node"]],
+        ["Time complexity depends on the heuristic used to calculate the distance from the end node"],
+        """
+        One of The most acclaimed graph search algorithms, A* utilizes the idea of
+        low-cost pathfinding (which node is the least far from the beginning?) as well as a Heuristic function
+        (which node has the lowest distance from the end?). ELPath uses Manhattan distance for the heuristic,
+        and there's a wide range of other options.
+        """
+        ],
 }

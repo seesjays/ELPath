@@ -70,10 +70,10 @@ class AlgorithmWindow:
             self.clear_highlights()
             for highlight in new_data:
 
-                if highlight not in self.highlight_list:
-                    self.highlight_list.append(highlight)
-
                 if (highlight != "message"):
+                    if highlight not in self.highlight_list:
+                        self.highlight_list.append(highlight)
+
                     add_bar_series("Algorithm", highlight,
                                    [0], [0], weight=0.5)
                     x_highlight = new_data[highlight]
