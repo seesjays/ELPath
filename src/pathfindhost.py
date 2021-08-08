@@ -443,20 +443,8 @@ class PathfindingHost:
             open_set_hash.remove(current)
 
             if current == self.end:
-                current = self.end
-                path = []
-                while current != self.start:
-                    path.append(current)
-                    current.set_state_path()
-                    draw_func(current)
-                    current = came_from[current]
-
-                    self.start.set_alt_state("START")
-                    draw_func(self.start)
-                    self.end.set_alt_state("END")
-                    draw_func(self.end)
-                    yield 2
                 break
+
             for neighbor in current.neighbors:
                 temp_g_score = g_score[current] + 1
                 if temp_g_score < g_score[neighbor]:
@@ -475,6 +463,19 @@ class PathfindingHost:
             if current != self.start:
                 current.set_state_closed()
                 draw_func(current)
+            
+        current = self.end
+        path = []
+        while current != self.start:
+            path.append(current)
+            current.set_state_path()
+            draw_func(current)
+            current = came_from[current]
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+            yield 2
 
     def manhattanheur(self, a, b):
         x1, y1 = a
