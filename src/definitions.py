@@ -17,7 +17,8 @@ DEFINITIONS = {
         ["All cases: O(n log n)"],
         """
         Merge Sort functions by dividing a dataset into smaller pieces, 
-        then combining the pieces in increasingly-large chunks. 
+        sorting them in small segments, 
+        then combining the pieces in chunks of increasing size
         Eventually, the sorted chunks are combined to form a final, sorted data set.
         """
     ],
@@ -89,21 +90,21 @@ DEFINITIONS = {
         "Graph Search",
         ["Best and worst case: O((|V| + |E|) log |V|)"],
         """
-        One of the more informed algorithms, Dijkstra's functions using a graph with weighted edges, finding
-        the lowest-cost path to an objective by scanning the neighbors around a node for the next node with the lowest weight.
-        NOTE: There is currently no way to manually set weights in ELPath, so to stay true to the demonstration,
-        a randomized weight list is used. (Without weights, Dijkstra's functions similarly to Depth-First Search)
+        Dijkstra's functions using a graph with weighted edges, finding
+        the lowest-cost path to the end by travelling along nodes with the lowest weights.
+        NOTE: There is currently no way to manually set weights in ELPath, so nodes
+        are weighted randomly.
         """
     ],
 
     "A* Algorithm": [
         "Graph Search",
-        ["Time complexity depends on the heuristic used to calculate the distance from the end node"],
+        ["Depends on heuristic function."],
         """
         One of The most acclaimed graph search algorithms, A* utilizes the idea of
-        low-cost pathfinding (which node is the least far from the beginning?) as well as a Heuristic function
-        (which node has the lowest distance from the end?). ELPath uses Manhattan distance for the heuristic,
-        and there's a wide range of other options.
+        low-cost pathfinding (Which node is closest to the beginning?)
+        as well as a heuristic function (Which node is closest to the end?). 
+        ELPath uses Manhattan distance for the heuristic,
         """
         ],
 }

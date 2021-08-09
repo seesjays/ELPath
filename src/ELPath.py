@@ -18,6 +18,7 @@ class ELPath():
 
         self.all_algorithms = {}
 
+        self.curr_window = None
         self.__initialize_window()
         self.__mount(self.mode, "Quick Sort")
 
@@ -68,13 +69,14 @@ class ELPath():
         newalgmode = self.all_algorithms[newalg]
         if self.mode == "Sorting" and newalgmode == self.mode:
             self.sorting_callbacks["set_algorithm"](newalg)
-            self.update_info_no_wrapper()
         elif self.mode == "Pathfinding" and newalgmode == self.mode:
             self.pathfinding_callbacks["set_algorithm"](newalg)
-            self.update_info_no_wrapper()
         else:  # mismatch
             self.__unmount()
             self.__mount(newalgmode, newalg)
+        
+        self.update_info_no_wrapper()
+        self.update_info_alg_definition()
 
     def __mount_sorting(self, alg):
         self.algorithms = AlgorithmWindow()
@@ -92,12 +94,12 @@ class ELPath():
     def __mount_pathing(self, alg):
         self.pathing = PathingWindow()
         self.pathfinding_callbacks = {
-            "generate_maze": self.pathing.randmaze,
+            "generate_maze": self.update_info(self.pathing.randmaze),
             "set_algorithm": self.pathing.change_algorithm,
             "run_sim": self.run_pathfinding,
             "next_step": self.pathing.next_step,
-            "reset": self.pathing.reset,
-            "retry": self.pathing.retry
+            "reset": self.update_info(self.pathing.reset),
+            "retry": self.update_info(self.pathing.retry)
         }
         self.pathing.initialize_grid()
         self.pathing.change_algorithm(alg)
@@ -114,6 +116,7 @@ class ELPath():
 
         self.mode = newmode
         self.update_info_no_wrapper()
+        self.update_info_alg_definition()
 
     def __link_sorting_controls(self):
         add_text("Algorithm:", parent="ELPath")
@@ -211,6 +214,8 @@ class ELPath():
         while get_value(sender):
             updated = self.pathing.next_step()
             sleep(get_value("step_sleep_slider")/100)
+            self.update_info_no_wrapper()
+
 
             if (not updated):
                 set_value(sender, False)
@@ -228,14 +233,38 @@ class ELPath():
         def wrapper():
             func()
             set_value("alginfo", self.curr_window.message)
+            print("dar")
+            if self.curr_window.is_initial():
+                print("dar")
+                self.update_info_alg_definition()
 
         return wrapper
 
     def update_info_no_wrapper(self):
         set_value("alginfo", self.curr_window.message)
+        if self.curr_window.is_initial():
+            self.update_info_alg_definition()
 
     def update_info_alg_definition(self):
-        defs.DEFINITIONS[self.curr_window.current_alg()]
-        set_value("alginfo", self.curr_window.definition)
+        definition = defs.DEFINITIONS[self.curr_window.current_alg()] 
+        
+        algtype =  definition[0]
+        cases = definition[1]
+        desc = definition[2]
+
+        defstring = f"{self.curr_window.current_alg()}\n\n"
+        defstring += "Type: " + algtype + '\n\n'
+        
+        defstring += "Time Complexities:" if len(cases) > 1 else "Time Complexity:" 
+        for case in cases:
+            defstring += '\n' + case
+
+        defstring += "\n\n"
+
+        desc = desc.replace("\n", "").replace("\t", "").strip()
+        desc = ' '.join(desc.split())
+        defstring += desc
+
+        set_value("alginfo", defstring)
 
 

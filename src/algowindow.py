@@ -120,4 +120,9 @@ class AlgorithmWindow:
 
     def current_alg(self):
         return self.algorithms_host.alg_name
+
+    def is_initial(self):
+        if self.algorithms_host.step_counter == 0:
+            return True
+        return False
         

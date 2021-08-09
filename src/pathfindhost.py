@@ -55,7 +55,12 @@ class PathfindingHost:
         self.current_algorithm = self.alg_list[self.alg_name]
 
         self.initialized = False
+
+        # Info
         self.step_counter = 0
+        self.path_length = 0
+        self.nodes_visited = 0
+        self.nodes_detected = 0
 
     def set_algorithm(self, name):
         self.alg_name = name
@@ -152,8 +157,7 @@ class PathfindingHost:
     def next_step(self):
         try:
             self.step_counter += 1
-            next(self.current_algorithm)
-            return True
+            return next(self.current_algorithm)
         except StopIteration:
             self.step_counter -= 1
             return False
@@ -255,8 +259,33 @@ class PathfindingHost:
 
         return weightlist
 
+
+    def reset_info(self):
+        self.step_counter = 0
+        self.path_length = 0
+        self.nodes_visited = 0
+        self.nodes_detected = 0
+
     # algs
+
+    def tracepath(self, draw_func, came_from):
+        current = self.end
+        path = []
+        while current != self.start:
+            path.append(current)
+            current.set_state_path()
+            draw_func(current)
+            current = came_from[current]
+
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+            yield 2
+      
     def breadthfirst(self, draw_func):
+        self.reset_info()
+
         frontier = queue.Queue()
         frontier.put(self.start)
         came_from = dict()
@@ -292,21 +321,12 @@ class PathfindingHost:
             self.end.set_alt_state("END")
             draw_func(self.end)
 
-        current = self.end
-        path = []
-        while current != self.start:
-            path.append(current)
-            current.set_state_path()
-            draw_func(current)
-            current = came_from[current]
-
-            self.start.set_alt_state("START")
-            draw_func(self.start)
-            self.end.set_alt_state("END")
-            draw_func(self.end)
-            yield 2
+        for stepback in self.tracepath(draw_func, came_from):
+            yield "Retracing Path"
 
     def depthfirst(self, draw_func):
+        self.reset_info()
+
         stack = []
         discovered = set()
         stack.append(self.start)
@@ -345,32 +365,23 @@ class PathfindingHost:
             vert.set_state_closed()
             draw_func(vert)
         
-        current = self.end
-        path = []
-        while current != self.start:
-            path.append(current)
-            current.set_state_path()
-            draw_func(current)
-            current = came_from[current]
-
-            self.start.set_alt_state("START")
-            draw_func(self.start)
-            self.end.set_alt_state("END")
-            draw_func(self.end)
-            yield 2
+        for stepback in self.tracepath(draw_func, came_from):
+            yield "Retracing Path"
 
     def dijkstras(self, draw_func):
+        self.reset_info()
+
         weights = self.rand_weights()
         self.draw_weights(weights)
 
         vertset = []
         distances = {}
-        prev = {}
+        came_from = {}
 
         for row in self.grid:
             for node in row:
                 distances[node] = float("inf")
-                prev[node] = None
+                came_from[node] = None
                 vertset.append(node)
 
         initial_node = self.start
@@ -396,7 +407,7 @@ class PathfindingHost:
                     alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
                         distances[neighbor] = alt
-                        prev[neighbor] = lowest
+                        came_from[neighbor] = lowest
                     neighbor.set_state_open()
                     draw_func(neighbor)
 
@@ -404,28 +415,17 @@ class PathfindingHost:
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
-                yield 1
+            yield 1
 
             lowest.set_state_closed()
             draw_func(lowest)
 
-            yield 1
-
-        current = self.end
-        path = []
-        while current != self.start:
-            path.append(current)
-            current.set_state_path()
-            draw_func(current)
-            current = prev[current]
-
-            self.start.set_alt_state("START")
-            draw_func(self.start)
-            self.end.set_alt_state("END")
-            draw_func(self.end)
-            yield 2
+        for stepback in self.tracepath(draw_func, came_from):
+            yield "Retracing Path"
 
     def astar(self, draw_func):
+        self.reset_info()
+        
         count = 0
         open_set = queue.PriorityQueue()
         open_set.put((0, count, self.start))
@@ -440,6 +440,8 @@ class PathfindingHost:
 
         while not open_set.empty():
             current = open_set.get()[2]
+            current.set_alt_state("SPCL")
+            draw_func(current)
             open_set_hash.remove(current)
 
             if current == self.end:
@@ -458,24 +460,18 @@ class PathfindingHost:
                         open_set_hash.add(neighbor)
                         neighbor.set_state_open()
                         draw_func(neighbor)
-                        yield 1
+                self.start.set_alt_state("START")
+                draw_func(self.start)
+                self.end.set_alt_state("END")
+                draw_func(self.end)
+            yield 1
 
             if current != self.start:
                 current.set_state_closed()
                 draw_func(current)
             
-        current = self.end
-        path = []
-        while current != self.start:
-            path.append(current)
-            current.set_state_path()
-            draw_func(current)
-            current = came_from[current]
-            self.start.set_alt_state("START")
-            draw_func(self.start)
-            self.end.set_alt_state("END")
-            draw_func(self.end)
-            yield 2
+        for stepback in self.tracepath(draw_func, came_from):
+            yield "Retracing Path"
 
     def manhattanheur(self, a, b):
         x1, y1 = a

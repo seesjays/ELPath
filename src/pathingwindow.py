@@ -122,7 +122,16 @@ class PathingWindow:
         if not self.pathing_host.initialized:
             self.pathing_host.initialize_neighbors()
             set_mouse_down_callback(None)
-        return self.pathing_host.next_step()
+        
+        result = self.pathing_host.next_step()
+        print(result)
+
+        if result:
+            self.message = f"{self.pathing_host.alg_name} Step {self.pathing_host.step_counter}:\n{result}"
+        else:
+            self.message = f"{self.pathing_host.alg_name}: Complete in {self.pathing_host.step_counter} steps."
+
+        return result
 
     def reset(self):
         curr_alg_name = self.pathing_host.alg_name
@@ -147,4 +156,9 @@ class PathingWindow:
 
     def current_alg(self):
         return self.pathing_host.alg_name
+
+    def is_initial(self):
+        if self.pathing_host.step_counter == 0:
+            return True
+        return False
 
