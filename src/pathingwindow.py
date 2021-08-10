@@ -124,7 +124,6 @@ class PathingWindow:
             set_mouse_down_callback(None)
         
         result = self.pathing_host.next_step()
-        print(result)
 
         if result:
             self.message = f"{self.pathing_host.alg_name} Step {self.pathing_host.step_counter}:\n{result}"

@@ -333,37 +333,36 @@ class PathfindingHost:
         came_from = dict()
 
         while len(stack) > 0:
-            vert = stack.pop()
-            vert.set_alt_state("SPCL")
-            draw_func(vert)
+            current = stack.pop()
+            current.set_alt_state("SPCL")
+            draw_func(current)
 
-            if vert == self.end:
+            if current == self.end:
                 self.start.set_alt_state("START")
                 draw_func(self.start)
                 self.end.set_alt_state("END")
                 draw_func(self.end)
                 break
 
-            if vert not in discovered:
-                discovered.add(vert)
-                for neighbor in vert.neighbors:
+            if current not in discovered:
+                discovered.add(current)
+                for neighbor in current.neighbors:
                     if neighbor not in discovered:
                         stack.append(neighbor)
                         neighbor.set_state_open()
                         draw_func(neighbor)
                         if neighbor not in came_from:
-                            came_from[neighbor] = vert
-
+                            came_from[neighbor] = current
 
                     self.start.set_alt_state("START")
                     draw_func(self.start)
                     self.end.set_alt_state("END")
                     draw_func(self.end)
 
-                yield 1
+                yield f"Examining neighbors around node at ({current.x}, {current.y})"
 
-            vert.set_state_closed()
-            draw_func(vert)
+            current.set_state_closed()
+            draw_func(current)
         
         for stepback in self.tracepath(draw_func, came_from):
             yield "Retracing Path"
