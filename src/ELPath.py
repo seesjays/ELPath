@@ -97,7 +97,7 @@ class ELPath():
             "generate_maze": self.update_info(self.pathing.randmaze),
             "set_algorithm": self.pathing.change_algorithm,
             "run_sim": self.run_pathfinding,
-            "next_step": self.pathing.next_step,
+            "next_step": self.update_info(self.pathing.next_step),
             "reset": self.update_info(self.pathing.reset),
             "retry": self.update_info(self.pathing.retry)
         }
@@ -233,9 +233,7 @@ class ELPath():
         def wrapper():
             func()
             set_value("alginfo", self.curr_window.message)
-            print("dar")
             if self.curr_window.is_initial():
-                print("dar")
                 self.update_info_alg_definition()
 
         return wrapper

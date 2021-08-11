@@ -126,9 +126,14 @@ class PathingWindow:
         result = self.pathing_host.next_step()
 
         if result:
-            self.message = f"{self.pathing_host.alg_name} Step {self.pathing_host.step_counter}:\n{result}"
+            self.message = f"{self.pathing_host.alg_name} " 
+            self.message += f"Step {self.pathing_host.step_counter}:\n{result}\n"
+            self.message += f"Nodes visited: {self.pathing_host.nodes_found} / {self.side_cell_count*self.side_cell_count}"
+
         else:
-            self.message = f"{self.pathing_host.alg_name}: Complete in {self.pathing_host.step_counter} steps."
+            self.message = f"{self.pathing_host.alg_name}: Complete in {self.pathing_host.step_counter} steps.\n"
+            self.message += f"{self.pathing_host.nodes_found} / {self.side_cell_count*self.side_cell_count} nodes visited in total. ({((self.pathing_host.nodes_found / (self.side_cell_count*self.side_cell_count)) * 100):.2f}%)\n"
+            self.message += f"Path of length {self.pathing_host.path_length} traced."
 
         return result
 

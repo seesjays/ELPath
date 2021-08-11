@@ -59,8 +59,7 @@ class PathfindingHost:
         # Info
         self.step_counter = 0
         self.path_length = 0
-        self.nodes_visited = 0
-        self.nodes_detected = 0
+        self.nodes_found = 0
 
     def set_algorithm(self, name):
         self.alg_name = name
@@ -259,14 +258,10 @@ class PathfindingHost:
 
         return weightlist
 
-
     def reset_info(self):
         self.step_counter = 0
         self.path_length = 0
-        self.nodes_visited = 0
-        self.nodes_detected = 0
-
-    # algs
+        self.nodes_found = 0
 
     def tracepath(self, draw_func, came_from):
         current = self.end
@@ -276,12 +271,15 @@ class PathfindingHost:
             current.set_state_path()
             draw_func(current)
             current = came_from[current]
+            self.path_length += 1
 
             self.start.set_alt_state("START")
             draw_func(self.start)
             self.end.set_alt_state("END")
             draw_func(self.end)
-            yield 2
+            yield
+
+    # algs
       
     def breadthfirst(self, draw_func):
         self.reset_info()
@@ -295,13 +293,16 @@ class PathfindingHost:
             current = frontier.get()
             current.set_state_open()
             current.set_alt_state("SPCL")
+            self.nodes_found += 1
             draw_func(current)
 
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+
             if current == self.end:
-                self.start.set_alt_state("START")
-                draw_func(self.start)
-                self.end.set_alt_state("END")
-                draw_func(self.end)
+                yield "Visited end node, retracing path."
                 break
 
             for nxt in current.neighbors:
@@ -309,8 +310,10 @@ class PathfindingHost:
                     nxt.set_state_open()
                     frontier.put(nxt)
                     came_from[nxt] = current
+
                 draw_func(nxt)
-            yield 1
+            yield f"Examining node at ({current.x}, {current.y})"
+
 
             current.reset_alt_state()
             current.set_state_closed()
@@ -337,15 +340,20 @@ class PathfindingHost:
             current.set_alt_state("SPCL")
             draw_func(current)
 
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+
+
             if current == self.end:
-                self.start.set_alt_state("START")
-                draw_func(self.start)
-                self.end.set_alt_state("END")
-                draw_func(self.end)
+                self.nodes_found += 1
+                yield "Visited end node, retracing path."
                 break
 
             if current not in discovered:
                 discovered.add(current)
+                self.nodes_found = len(discovered)
                 for neighbor in current.neighbors:
                     if neighbor not in discovered:
                         stack.append(neighbor)
@@ -359,7 +367,7 @@ class PathfindingHost:
                     self.end.set_alt_state("END")
                     draw_func(self.end)
 
-                yield f"Examining neighbors around node at ({current.x}, {current.y})"
+                yield f"Examining node at ({current.x}, {current.y})"
 
             current.set_state_closed()
             draw_func(current)
@@ -389,19 +397,29 @@ class PathfindingHost:
         while len(vertset) > 0:
             tempmin = None
             lowest = None
-            for thing in vertset:
-                if tempmin is None or distances[thing] < tempmin:
-                    tempmin = distances[thing]
-                    lowest = thing
+            for node in vertset:
+                if tempmin is None or distances[node] < tempmin:
+                    tempmin = distances[node]
+                    lowest = node
 
             vertset.remove(lowest)
             lowest.set_alt_state("SPCL")
+            self.nodes_found += 1
             draw_func(lowest)
 
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+
             if lowest == self.end:
+                yield "Visited end node, retracing path."
                 break
 
+            weights_list = []
+
             for neighbor in lowest.neighbors:
+                weights_list.append((neighbor, "Visited" if neighbor.state == "CLOSE" else weights[neighbor]))
                 if neighbor in vertset:
                     alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
@@ -410,11 +428,14 @@ class PathfindingHost:
                     neighbor.set_state_open()
                     draw_func(neighbor)
 
-                self.start.set_alt_state("START")
-                draw_func(self.start)
-                self.end.set_alt_state("END")
-                draw_func(self.end)
-            yield 1
+            outmessage = f"Examining neighbors around node at ({lowest.x}, {lowest.y}).\n"
+            
+            scorelisting = ""
+            for score in weights_list:
+                scorelisting += f"({score[0].x}, {score[0].y}): {score[1]}\n"
+
+            outmessage += f"Neighbor node weights:\n{scorelisting}"
+            yield outmessage
 
             lowest.set_state_closed()
             draw_func(lowest)
@@ -437,17 +458,28 @@ class PathfindingHost:
 
         open_set_hash = {self.start}
 
-        while not open_set.empty():
+        while not open_set.empty():            
             current = open_set.get()[2]
             current.set_alt_state("SPCL")
+            self.nodes_found += 1
             draw_func(current)
             open_set_hash.remove(current)
 
+            self.start.set_alt_state("START")
+            draw_func(self.start)
+            self.end.set_alt_state("END")
+            draw_func(self.end)
+
+
             if current == self.end:
+                yield "Visited end node, retracing path."
                 break
+
+            f_score_list = []
 
             for neighbor in current.neighbors:
                 temp_g_score = g_score[current] + 1
+                f_score_list.append((neighbor, "Visited" if neighbor.state == "CLOSE" else f_score[neighbor]))
                 if temp_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = temp_g_score
@@ -458,12 +490,18 @@ class PathfindingHost:
                         open_set.put((f_score[neighbor], count, neighbor))
                         open_set_hash.add(neighbor)
                         neighbor.set_state_open()
+
                         draw_func(neighbor)
-                self.start.set_alt_state("START")
-                draw_func(self.start)
-                self.end.set_alt_state("END")
-                draw_func(self.end)
-            yield 1
+                
+
+            outmessage = f"Examining neighbors around node at ({current.x}, {current.y}).\n"
+            
+            scorelisting = ""
+            for score in f_score_list:
+                scorelisting += f"({score[0].x}, {score[0].y}): {score[1]}\n"
+
+            outmessage += f"Neighbor node F scores:\n{scorelisting}"
+            yield outmessage
 
             if current != self.start:
                 current.set_state_closed()
