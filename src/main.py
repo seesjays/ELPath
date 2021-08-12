@@ -1,8 +1,9 @@
-from dearpygui.core import *
-from dearpygui.simple import *
+import dearpygui.dearpygui as dpg
 from consts import *
 from ELPath import *
 
 ELPath = ELPath()
 
-start_dearpygui(primary_window="ELPath")
+ELPath.viewport_config()
+
+dpg.start_dearpygui()

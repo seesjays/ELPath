@@ -27,3 +27,10 @@ UNINTERACTIVE_GRAPH_PARAMS= {
     "no_legend": True,
     "no_mouse_pos": True,
 }
+
+GRAPH_PARAMS = {
+    "no_menus": True,
+    "no_box_select": True,
+    "no_mouse_pos": True,
+    "crosshairs": False,
+}

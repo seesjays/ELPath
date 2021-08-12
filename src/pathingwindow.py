@@ -1,5 +1,4 @@
-from dearpygui.core import *
-from dearpygui.simple import *
+import dearpygui.dearpygui as dpg
 from pathfindhost import PathfindingHost
 import consts as cnsts
 from random import randint
@@ -8,7 +7,7 @@ from math import trunc
 
 
 class PathingWindow:
-    def __init__(self):
+    def __init__(self, window_id=None):
         self.window_size = 800
         self.side_cell_count = 41
         self.cell_size = self.window_size/self.side_cell_count
@@ -34,7 +33,7 @@ class PathingWindow:
 
     def change_algorithm(self):
         self.retry()
-        self.pathing_host.set_algorithm(get_value("algorithm_combobox"))
+        self.pathing_host.set_algorithm(dpg.get_value("algorithm_combobox"))
         self.message = self.pathing_host.alg_name
 
     def change_algorithm(self, alg):
@@ -121,7 +120,7 @@ class PathingWindow:
 
         if not self.pathing_host.initialized:
             self.pathing_host.initialize_neighbors()
-            set_mouse_down_callback(None)
+            dpg.set_mouse_down_callback(None)
         
         result = self.pathing_host.next_step()
 
@@ -147,15 +146,15 @@ class PathingWindow:
 
     def retry(self):
         self.pathing_host.retry_maze()
-        set_mouse_down_callback(self.cell_clicked)
+        dpg.set_mouse_down_callback(self.cell_clicked)
 
     def randmaze(self):
         self.pathing_host.rand_maze() #drawing is handled in-alg    
         self.pathing_host.retry_maze()
-        set_mouse_down_callback(self.cell_clicked)
+        dpg.set_mouse_down_callback(self.cell_clicked)
 
     def unmount(self):
-        delete_item("grid", children_only=False)
+        dpg.delete_item("grid", children_only=False)
         self.pathing_host = None
 
     def current_alg(self):
