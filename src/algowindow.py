@@ -19,7 +19,28 @@ class AlgorithmWindow:
         self.plot = None
         self.plot_x_axis = None
         self.plot_y_axis = None
-        self.bar_graph = None
+        self.default_graph = None
+
+        self.plots = {
+            "red": None,
+            "green": None,
+            "yellow": None
+        }
+
+    def load_themes(self):
+        with dpg.theme() as red:
+            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+                                (196, 78, 82), category=dpg.mvThemeCat_Plots)
+        with dpg.theme() as green:
+            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+                                (85, 168, 104), category=dpg.mvThemeCat_Plots)
+        with dpg.theme() as yellow:
+            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+                                (204, 185, 116), category=dpg.mvThemeCat_Plots)
+
+        dpg.set_item_theme(self.plots["red"], red)
+        dpg.set_item_theme(self.plots["green"], green)
+        dpg.set_item_theme(self.plots["yellow"], yellow)
 
     def set_limits(self):
         # Because we initialize our plots starting at 0 now, we just need to see everything from -1 (to include the 0 position) to
@@ -40,71 +61,63 @@ class AlgorithmWindow:
             crosshairs=False)
 
         self.plot_x_axis = dpg.add_plot_axis(dpg.mvXAxis, label="", no_gridlines=True, no_tick_marks=True,
-                          no_tick_labels=True, lock_min=True, lock_max=True, parent=self.plot)
+                                             no_tick_labels=True, lock_min=True, lock_max=True, parent=self.plot)
         self.plot_y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="", no_gridlines=True, no_tick_marks=True,
-                          no_tick_labels=True, lock_min=True, lock_max=True,  parent=self.plot)
+                                             no_tick_labels=True, lock_min=True, lock_max=True,  parent=self.plot)
 
-        self.bar_graph = dpg.add_bar_series(self.algorithms_host.data_x, self.algorithms_host.data_y, label="", weight=0.5, parent=self.plot_y_axis)
+        self.default_graph = dpg.add_bar_series(
+            self.algorithms_host.data_x, self.algorithms_host.data_y, label="", weight=0.5, parent=self.plot_y_axis)
+
+        self.plots["red"] = dpg.add_bar_series(
+            self.algorithms_host.data_x, self.algorithms_host.data_y, label="", weight=0.5, parent=self.plot_y_axis)
+        self.plots["green"] = dpg.add_bar_series(
+            self.algorithms_host.data_x, self.algorithms_host.data_y, label="", weight=0.5, parent=self.plot_y_axis)
+        self.plots["yellow"] = dpg.add_bar_series(
+            self.algorithms_host.data_x, self.algorithms_host.data_y, label="", weight=0.5, parent=self.plot_y_axis)
+
+        self.load_themes()
 
         self.set_limits()
 
     def reset_plot(self):
         dpg.set_item_label(self.plot, f"{self.algorithms_host.alg_name}")
         self.message = f"{self.algorithms_host.alg_name}"
-        dpg.add_bar_series(self.plot, "data", self.algorithms_host.data_x,
-                           self.algorithms_host.data_y, weight=0.5)
-        # clear other series
-        dpg.add_bar_series(self.plot, "highlight", [0], [0], weight=0.5)
-        dpg.add_bar_series(self.plot, "highlight-special",
-                           [0], [0], weight=0.5)
+
+        dpg.set_value(self.default_graph, [
+                      self.algorithms_host.data_x, self.algorithms_host.data_y])
+
+        self.clear_highlights()
         self.set_limits()
 
-    # For now, just redraw everything, specific graph redraw can be slated for later
-    # 6/21/21 Multipurpose function: if new_data == 1, clear out highlight
-    # 6/30/21 new_data structure as follows: [[red highlight x's], [green highlight x's], "step_desc"]
-    # 7/2/21 new_data structure as follows:
-    """
-    {
-        "highlight-tier": [highlight x's],
-        "highlight-tier": [highlight x's],
-        "highlight-tier": [highlight x's],
-        "message": "message to user"
-    }
-    """
-
     def update(self, new_data):
-        dpg.add_bar_series(self.plot, "data", self.algorithms_host.data_x,
-                           self.algorithms_host.data_y, weight=0.5)
+        dpg.set_value(self.default_graph, [
+                      self.algorithms_host.data_x, self.algorithms_host.data_y])
 
         if (not new_data):
             self.clear_highlights()
+            dpg.set_value(self.plots["green"], [
+                          self.algorithms_host.data_x, self.algorithms_host.data_y])
 
-            dpg.add_bar_series(self.plot, "highlight-special",
-                               self.algorithms_host.data_x, self.algorithms_host.data_y, weight=0.5)
             self.message = f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps."
 
         else:
             self.clear_highlights()
             for highlight in new_data:
-
+                print(new_data)
                 if (highlight != "message"):
-                    if highlight not in self.highlight_list:
-                        self.highlight_list.append(highlight)
-
-                    dpg.add_bar_series(self.plot, highlight,
-                                       [0], [0], weight=0.5)
                     x_highlight = new_data[highlight]
-                    dpg.add_bar_series(self.plot, highlight, x_highlight, [
-                        self.algorithms_host.data_y[x_value] for x_value in x_highlight], weight=0.5)
+
+                    dpg.set_value(self.plots[highlight], [x_highlight, [
+                        self.algorithms_host.data_y[x_value] for x_value in x_highlight]])
 
             self.message = f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data['message']}"
 
     def clear_highlights(self):
-        for highlight in self.highlight_list:
-            dpg.add_bar_series(self.plot, highlight, [0], [0], weight=0.5)
+        dpg.set_value(self.plots["red"], [[0], [0]])
+        dpg.set_value(self.plots["green"], [[0], [0]])
+        dpg.set_value(self.plots["yellow"], [[0], [0]])
 
     def new_dataset(self):
-        self.clear_highlights()
         self.algorithms_host.set_random_data()
         self.reset_plot()
 
@@ -115,11 +128,6 @@ class AlgorithmWindow:
         value = self.algorithms_host.next_step()
         self.update(value)
         return value
-
-    def change_algorithm(self):
-        self.clear_highlights()
-        self.algorithms_host.set_algorithm(get_value("algorithm_combobox"))
-        self.original_data()
 
     def change_algorithm(self, newalg):
         self.clear_highlights()

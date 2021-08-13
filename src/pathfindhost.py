@@ -247,6 +247,24 @@ class PathfindingHost:
             self.draw_node(current_cell)
         self.add_end(choice(open_nodes))
 
+        # saves the effort of running maze retry
+        # start/end not placed
+        try:
+            self.add_start(self.node_from_pos(self.start_point))
+            self.add_end(self.node_from_pos(self.end_point))
+        except TypeError:  # start/end not initialized
+            self.start_point = (0, 0)
+            self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
+
+            self.start = self.node_from_pos(self.start_point)
+            self.end = self.node_from_pos(self.end_point)
+
+            self.add_start(self.node_from_pos(self.start_point))
+            self.add_end(self.node_from_pos(self.end_point))
+
+        self.initialized = False
+        self.current_algorithm = self.alg_list[self.alg_name]
+
     def rand_weights(self):
         # Generates a random list of weights for each node - to help along Dijkstras's
         weightlevels = [20, 200]

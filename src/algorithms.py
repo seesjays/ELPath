@@ -7,17 +7,17 @@ def bubble(data):
         for j in range(0, n-i-1):
             if data[j] > data[j + 1]:
                 yield {
-                    "highlight": [j, j+1],
+                    "red": [j, j+1],
                     "message": "Unsorted pair found"
                 }
                 data[j], data[j + 1] = data[j + 1], data[j]
                 yield {
-                    "highlight-special": [j, j+1],
+                    "green": [j, j+1],
                     "message": "Unsorted pair swapped"
                 }
             else:
                 yield {
-                    "highlight-special": [j, j+1],
+                    "green": [j, j+1],
                     "message": "Pair already sorted"
                 }
                 
@@ -28,7 +28,7 @@ def selection(data):
         #assume min is firt el
         j_min = i
         yield {
-            "selected": [j_min],
+            "yellow": [j_min],
             "message": "New minimum found"
         }
 
@@ -37,24 +37,24 @@ def selection(data):
                 # new min
                 j_min = j
                 yield {
-                    "selected": [j_min],
+                    "yellow": [j_min],
                     "message": "New minimum found"
                 }
             else:
                 yield {
-                    "selected": [j_min],
-                    "highlight-special": [j],
+                    "yellow": [j_min],
+                    "green": [j],
                     "message": "Searching for lower minimum"
                 }
 
         if j_min != i:
             yield {
-                "highlight": [j_min, i],
+                "red": [j_min, i],
                 "message": "Swapping the left bar with the lowest minimum"
             }
             data[i], data[j_min] = data[j_min], data[i]
             yield {
-                "highlight-special": [j_min, i],
+                "green": [j_min, i],
                 "message": "Swap complete"
             }
 
@@ -78,27 +78,27 @@ def merge(data):
             while a < len(left) and b < len(right):
                 if left[a] < right[b]:
                     yield {
-                        "highlight": [c],
-                        "selected": [start, end-1],
+                        "red": [c],
+                        "yellow": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
                     data[c] = left[a]
                     yield {
-                        "highlight-special": [c],
-                        "selected": [start, end-1],
+                        "green": [c],
+                        "yellow": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
                     a += 1
                 else:
                     yield {
-                        "highlight": [c],
-                        "selected": [start, end-1],
+                        "red": [c],
+                        "yellow": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
                     data[c] = right[b]
                     yield {
-                        "highlight-special": [c],
-                        "selected": [start, end-1],
+                        "green": [c],
+                        "yellow": [start, end-1],
                         "message": "Sorting between yellow bars"
                     }
                     b += 1
@@ -106,14 +106,14 @@ def merge(data):
 
             while a < len(left):
                 yield {
-                    "highlight": [c],
-                    "selected": [start, end-1],
+                    "red": [c],
+                    "yellow": [start, end-1],
                     "message": "Adding leftover from left temp array"
                 }
                 data[c] = left[a]
                 yield {
-                    "highlight-special": [c],
-                    "selected": [start, end-1],
+                    "green": [c],
+                    "yellow": [start, end-1],
                     "message": "Add complete"
                 }
                 a += 1
@@ -121,14 +121,14 @@ def merge(data):
 
             while b < len(right):
                 yield {
-                    "highlight": [c],
-                    "selected": [start, end-1],
+                    "red": [c],
+                    "yellow": [start, end-1],
                     "message": "Adding leftover from right temp array"
                 }
                 data[c] = right[b]
                 yield {
-                    "highlight-special": [c],
-                    "selected": [start, end-1],
+                    "green": [c],
+                    "yellow": [start, end-1],
                     "message": "Add complete"
                 }
                 b += 1
@@ -149,7 +149,7 @@ def quick_sort(start, end, array):
         pivot = array[pivot_index]
 
         yield {
-            "selected": [pivot_index],
+            "yellow": [pivot_index],
             "message": "New pivot point selected"
         }
 
@@ -164,16 +164,16 @@ def quick_sort(start, end, array):
             # element greater than  pivot
             while intstart < lnth and array[intstart] <= pivot:
                 yield {
-                    "highlight": [intstart],
-                    "selected": [pivot_index],
+                    "red": [intstart],
+                    "yellow": [pivot_index],
                     "message": "Searching for an element greater than the pivot"
                 }
                 intstart += 1
 
             if intstart < lnth:
                 yield {
-                    "highlight-special": [intstart],
-                    "selected": [pivot_index],
+                    "green": [intstart],
+                    "yellow": [pivot_index],
                     "message": "Found an element greater than the pivot"
                 }
 
@@ -181,41 +181,41 @@ def quick_sort(start, end, array):
             # element less than pivot
             while array[intend] > pivot:
                 yield {
-                    "highlight": [intend],
-                    "selected": [pivot_index],
+                    "red": [intend],
+                    "yellow": [pivot_index],
                     "message": "Searching for an element smaller than the pivot"
                 }
                 intend -= 1
 
             yield {
-                "highlight-special": [intend],
-                "selected": [pivot_index],
+                "green": [intend],
+                "yellow": [pivot_index],
                 "message": "Found an element smaller than the pivot"
             }
             # If start and end have not crossed each other,
             # swap the numbers on start and end
             if(intstart < intend):
                 yield {
-                    "highlight": [intstart, intend],
-                    "selected": [pivot_index],
+                    "red": [intstart, intend],
+                    "yellow": [pivot_index],
                     "message": "Swapping the smaller and greater elements"
                 }
                 array[intstart], array[intend] = array[intend], array[intstart]
                 yield {
-                    "highlight-special": [intstart, intend],
-                    "selected": [pivot_index],
+                    "green": [intstart, intend],
+                    "yellow": [pivot_index],
                     "message": "Swap complete"
                 }
 
         # Swap pivot element with element on end pointer.
         # This puts pivot on its correct sorted place.
         yield {
-            "highlight": [intend, pivot_index],
+            "red": [intend, pivot_index],
             "message": "Placing pivot where the last smaller element was"
         }
         array[intend], array[pivot_index] = array[pivot_index], array[intend]
         yield {
-            "highlight-special": [intend, pivot_index],
+            "green": [intend, pivot_index],
             "message": "Pivot placed"
         }
         # Returning end pointer to divide the array into 2
@@ -238,18 +238,18 @@ def cocktail(data):
         for i in range(0, len(data)-2):
             if data[i] > data[i+1]:
                 yield {
-                    "highlight": [i, i+1],
+                    "red": [i, i+1],
                     "message": "Left bar is greater than right"
                 }
                 data[i], data[i+1] = data[i+1], data[i]
                 swapped = True
                 yield {
-                    "highlight-special": [i, i+1],
+                    "green": [i, i+1],
                     "message": "Swapped bars"
                 }
             else:
                 yield {
-                    "selected": [i, i+1],
+                    "yellow": [i, i+1],
                     "message": "Bars already ordered"
                 }
 
@@ -264,18 +264,18 @@ def cocktail(data):
         for i in range(len(data)-2, 0, -1):
             if data[i] > data[i+1]:
                 yield {
-                    "highlight": [i, i+1],
+                    "red": [i, i+1],
                     "message": "Left bar is greater than right"
                 }
                 data[i], data[i+1] = data[i+1], data[i]
                 swapped = True
                 yield {
-                    "highlight-special": [i, i+1],
+                    "green": [i, i+1],
                     "message": "Swapped bars"
                 }
             else:
                 yield {
-                    "selected": [i, i+1],
+                    "yellow": [i, i+1],
                     "message": "Bars already ordered"
                 }
 
@@ -286,34 +286,34 @@ def insertion(data):
         key = data[i]
         j = i - 1
         yield {
-            "selected": [i],
+            "yellow": [i],
             "message": "Checking bar before this one for a greater value"
         }
         selected = False
         while j >= 0 and data[j] > key:
             if not selected:
                 yield {
-                    "highlight": [i],
+                    "red": [i],
                     "message": "Bar before this is greater, saving the smaller bar"
                 }
 
             yield {
-                "highlight": [j, j+1],
+                "red": [j, j+1],
                 "message": "Moving the left bar forward"
             }
             data[j+1] = data[j]
             yield {
-                "highlight-special": [j, j+1],
+                "green": [j, j+1],
                 "message": "Move complete"
             }
             j -= 1
             selected = True
         yield {
-            "selected": [j+1],
+            "yellow": [j+1],
             "message": "Replacing this bar with the smaller one from earlier"
         }
         data[j + 1] = key
         yield {
-            "highlight-special": [j+1],
+            "green": [j+1],
             "message": "Replacement complete"
         }
