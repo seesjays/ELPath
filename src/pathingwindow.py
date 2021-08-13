@@ -36,17 +36,6 @@ class PathingWindow:
 
         self.node_grid = {}
 
-        self.line_locs = [(self.min_x+i*self.cell_size, self.min_x +
-                           (i+1)*self.cell_size) for i in range(self.side_cell_count)]
-
-        self.gen_ids()
-
-    def gen_ids(self):
-        for i in range(self.side_cell_count):
-            for j in range(self.side_cell_count):
-                node = (i, j)
-                self.node_grid[node] = dpg.generate_uuid()
-
     def change_algorithm(self):
         self.retry()
         self.pathing_host.set_algorithm(dpg.get_value("algorithm_combobox"))
@@ -58,33 +47,37 @@ class PathingWindow:
         self.message = self.pathing_host.alg_name
 
     def draw_node(self, node):
-        if node.state == node.altstate:
-            nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
-                node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[255, 255, 255, 0], thickness=2, fill=self.colors[node.state], parent=self.drawlist, id=self.node_grid[(node.x, node.y)])
-        else:
-            nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
-                node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[255, 255, 255, 0], thickness=2, fill=self.colors[node.altstate], parent=self.drawlist, id=self.node_grid[(node.x, node.y)])
+        nodeident = self.node_grid[(node.x, node.y)]
 
-        self.node_grid[(node.x, node.y)] = nodeident
+        if node.state == node.altstate:
+            dpg.configure_item(nodeident, fill=self.colors[node.state])
+        else:
+            dpg.configure_item(nodeident, fill=self.colors[node.altstate])
 
     def draw_weights(self, weightlist):
         # higher weights cost more, so make those less green - increase the tint of the color
         for node in weightlist:
-            dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
-                node.x+1)*self.cell_size, (node.y+1)*self.cell_size], fill=[255, 255, 0, 255], parent=self.drawlist)
+            weightednode = weightlist[node] + 10
+            nodeident = self.node_grid[(node.x, node.y)]
+            dpg.configure_item(nodeident, fill=[weightednode, 255, weightednode, 255])
 
     def initialize_grid(self):
         self.drawlist = dpg.add_drawlist(parent=self.window_id,
                                          width=800, height=800, show=True)
-        dpg.add_mouse_down_handler(callback=self.cell_clicked)
         for row in self.pathing_host.grid:
             for node in row:
-                self.draw_node(node)
+                nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
+                    node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[0, 0, 0, 255], thickness=2, fill=self.colors[node.state], parent=self.drawlist)
+                self.node_grid[(node.x, node.y)] = nodeident
+
+        dpg.add_mouse_down_handler(callback=self.cell_clicked)
 
     def cell_clicked(self):
+        if not self.is_initial():
+            return
         # Preventing click detection when outside of window
         genpos = dpg.get_mouse_pos()
-        genpos[1] += 30  # account for window padding
+        genpos[1] -= 15  # account for window padding
 
         if (genpos[1] > self.max_y or genpos[1] < self.min_y or genpos[0] < 0 or genpos[0] > self.max_x or dpg.get_active_window() != self.window_id):
             return
@@ -128,7 +121,6 @@ class PathingWindow:
 
         if not self.pathing_host.initialized:
             self.pathing_host.initialize_neighbors()
-            dpg.add_mouse_down_handler(callback=None)
 
         result = self.pathing_host.next_step()
 
@@ -150,16 +142,14 @@ class PathingWindow:
         self.pathing_host = PathfindingHost(
             self.side_cell_count, lambda node: self.draw_node(node), self.draw_weights, algorithm=curr_alg_name)
         self.initialize_grid()
-        dpg.add_mouse_down_handler(callback=self.cell_clicked)
 
     def retry(self):
+        dpg.delete_item(self.drawlist, children_only=False)
+        self.initialize_grid()
         self.pathing_host.retry_maze()
-        dpg.add_mouse_down_handler(callback=self.cell_clicked)
 
     def randmaze(self):
-        dpg.delete_item(self.drawlist, children_only=True)
         self.pathing_host.rand_maze()  # drawing is handled in-alg
-        dpg.add_mouse_down_handler(callback=self.cell_clicked)
 
     def unmount(self):
         dpg.delete_item(self.drawlist, children_only=False)

@@ -76,10 +76,17 @@ class PathfindingHost:
             return None
 
     def add_start(self, node):
-        node.set_state_start()
-        self.start_point = (node.x, node.y)
-        self.start = node
-        self.draw_node(self.start)
+        try:
+            node.set_state_start()
+            self.start_point = (node.x, node.y)
+            self.start = node
+            self.draw_node(self.start)
+        except:
+            self.start_point = (0, 0)
+
+            self.start = self.node_from_pos(self.start_point)
+
+            self.add_start(self.node_from_pos(self.start_point))
 
     def remove_start(self):
         start = self.node_from_pos(self.start_point)
@@ -89,10 +96,17 @@ class PathfindingHost:
         self.start = None
 
     def add_end(self, node):
-        node.set_state_end()
-        self.end_point = (node.x, node.y)
-        self.end = node
-        self.draw_node(self.end)
+        try:
+            node.set_state_end()
+            self.end_point = (node.x, node.y)
+            self.end = node
+            self.draw_node(self.end)
+        except:
+            self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
+
+            self.end = self.node_from_pos(self.end_point)
+
+            self.add_end(self.node_from_pos(self.end_point))
 
     def remove_end(self):
         end = self.node_from_pos(self.end_point)
@@ -207,8 +221,6 @@ class PathfindingHost:
         visited.add(startcell)
         stack.append(startcell)
 
-        self.add_start(startcell)
-
         sleep_tracker = 0
 
         while len(stack) > 0:
@@ -245,13 +257,17 @@ class PathfindingHost:
 
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
-        self.add_end(choice(open_nodes))
 
         # saves the effort of running maze retry
         # start/end not placed
+        startnode = choice(open_nodes)
+        endnode = choice(open_nodes)
+        while endnode == startnode:
+            endnode = choice(open_nodes)
+
         try:
-            self.add_start(self.node_from_pos(self.start_point))
-            self.add_end(self.node_from_pos(self.end_point))
+            self.add_start(startnode)
+            self.add_end(endnode)
         except TypeError:  # start/end not initialized
             self.start_point = (0, 0)
             self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
