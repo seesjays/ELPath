@@ -8,8 +8,8 @@ from math import trunc
 
 class PathingWindow:
     def __init__(self, window_id=None):
-        self.window_size = 800
         self.window_id = window_id
+        self.window_size = 800
         self.side_cell_count = 41
         self.cell_size = self.window_size/self.side_cell_count
 
@@ -22,19 +22,21 @@ class PathingWindow:
             self.side_cell_count, lambda node: self.draw_node(node), self.draw_weights)
         self.colors = {
             "EMPTY": [255, 255, 255],
-            "START": [127, 255, 0],
-            "END": [255, 0, 0],
-            "OPEN": [255, 255, 0],
-            "CLOSE": [0, 191, 255],
-            "PATH": [138, 43, 226],
-            "BARR": [54, 54, 54],
-            "SPCL": [255, 165, 0]
+            "START": [85, 168, 104],
+            "END": [196, 78, 82],
+            "OPEN": [204, 185, 116],
+            "CLOSE": [76, 114, 176],
+            "PATH": [129, 114, 179],
+            "BARR": [37, 37, 38],
+            "SPCL": [221, 132, 82]
         }
         self.message = self.pathing_host.alg_name
 
         self.drawlist = None
-
         self.node_grid = {}
+        
+        self.clickregistry = None
+        self.clickhandler = None
 
     def change_algorithm(self):
         self.retry()
@@ -70,7 +72,8 @@ class PathingWindow:
                     node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[0, 0, 0, 255], thickness=2, fill=self.colors[node.state], parent=self.drawlist)
                 self.node_grid[(node.x, node.y)] = nodeident
 
-        dpg.add_mouse_down_handler(callback=self.cell_clicked)
+        with dpg.handler_registry() as self.clickregistry:
+            self.clickhandler = dpg.add_mouse_down_handler(callback=self.cell_clicked)
 
     def cell_clicked(self):
         if not self.is_initial():
@@ -144,8 +147,8 @@ class PathingWindow:
         self.initialize_grid()
 
     def retry(self):
-        dpg.delete_item(self.drawlist, children_only=False)
-        self.initialize_grid()
+        #dpg.delete_item(self.drawlist, children_only=False)
+        #self.initialize_grid()
         self.pathing_host.retry_maze()
 
     def randmaze(self):
@@ -153,6 +156,7 @@ class PathingWindow:
 
     def unmount(self):
         dpg.delete_item(self.drawlist, children_only=False)
+        dpg.delete_item(self.clickregistry, children_only=False)
         self.pathing_host = None
 
     def current_alg(self):

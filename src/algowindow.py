@@ -103,7 +103,6 @@ class AlgorithmWindow:
         else:
             self.clear_highlights()
             for highlight in new_data:
-                print(new_data)
                 if (highlight != "message"):
                     x_highlight = new_data[highlight]
 
