@@ -37,6 +37,7 @@ class ELPath():
     def viewport_config(self):
         # Necessary to set the window size
         dpg.setup_viewport()
+        dpg.set_viewport_title("ELPath")
         dpg.set_viewport_width(self.WINDOW_WIDTH)
         dpg.set_viewport_height(self.WINDOW_HEIGHT)
 
