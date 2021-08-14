@@ -56,6 +56,7 @@ class PathfindingHost:
         self.step_counter = 0
         self.path_length = 0
         self.nodes_found = 0
+        self.barr_count = 0
 
     def set_algorithm(self, name):
         self.alg_name = name
@@ -264,9 +265,12 @@ class PathfindingHost:
             node.neighbors.append(down)
 
     def initialize_neighbors(self):
+        self.barr_count = 0
         for row in self.grid:
             for node in row:
                 node.origstate = node.state
+                if node.state == "BARR":
+                    self.barr_count += 1
                 self.update_node_neighbors(node)
         self.initialized = True
         self.current_algorithm = self.current_algorithm()

@@ -75,8 +75,12 @@ class PathingWindow:
                 callback=self.cell_clicked)
 
     def cell_clicked(self):
-        if not self.is_initial():
+        try:
+            if not self.is_initial():
+                return
+        except AttributeError:
             return
+
         # Preventing click detection when outside of window
         genpos = dpg.get_mouse_pos()
         genpos[1] -= 15  # account for window padding
@@ -126,14 +130,16 @@ class PathingWindow:
 
         result = self.pathing_host.next_step()
 
+        opensquares = (self.side_cell_count*self.side_cell_count-self.pathing_host.barr_count)
+
         if result:
             self.message = f"{self.pathing_host.alg_name} "
             self.message += f"Step {self.pathing_host.step_counter}:\n{result}\n"
-            self.message += f"Nodes visited: {self.pathing_host.nodes_found} / {self.side_cell_count*self.side_cell_count}"
+            self.message += f"Nodes visited: {self.pathing_host.nodes_found} / {opensquares}"
 
         else:
             self.message = f"{self.pathing_host.alg_name}: Complete in {self.pathing_host.step_counter} steps.\n"
-            self.message += f"{self.pathing_host.nodes_found} / {self.side_cell_count*self.side_cell_count} nodes visited in total. ({((self.pathing_host.nodes_found / (self.side_cell_count*self.side_cell_count)) * 100):.2f}%)\n"
+            self.message += f"{self.pathing_host.nodes_found} / {opensquares} nodes visited in total. ({((self.pathing_host.nodes_found / opensquares) * 100):.2f}%)\n"
             self.message += f"Path of length {self.pathing_host.path_length} traced."
 
         return result
