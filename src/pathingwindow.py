@@ -68,7 +68,7 @@ class PathingWindow:
         for row in self.pathing_host.grid:
             for node in row:
                 nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
-                    node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[0, 0, 0, 255], thickness=2, fill=self.colors[node.state], parent=self.drawlist)
+                    node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[0, 0, 0, 255], thickness=4, fill=self.colors[node.state], parent=self.drawlist)
                 self.node_grid[(node.x, node.y)] = nodeident
 
         with dpg.handler_registry() as self.clickregistry:
