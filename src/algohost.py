@@ -41,6 +41,21 @@ class AlgorithmHost:
         self.data_y = self.data_original.copy()
         self.current_algorithm = self.alg_list[self.alg_name]()
 
+    def change_data_len(self, changeamnt):
+        self.step_counter = 0
+
+        if (changeamnt < 0 and self.data_set_size - abs(changeamnt) < 5) or (changeamnt > 0 and self.data_set_size + abs(changeamnt) > 100):
+            return
+
+        self.data_set_size += changeamnt
+
+        self.data_x = [i for i in range(self.data_set_size)]
+        self.data_y = [randint(1, self.data_set_size)
+                       for i in range(self.data_set_size)]
+
+        self.data_original = self.data_y.copy()
+        self.current_algorithm = self.alg_list[self.alg_name]()
+
     def next_step(self):
         try:
             self.step_counter += 1
@@ -276,8 +291,8 @@ class AlgorithmHost:
             # Sort elements before partition
             # and after partition
 
-            yield from quick_sort(start, p - 1, array)
-            yield from quick_sort(p + 1, end, array)
+            yield from self.quick_sort(start, p - 1, array)
+            yield from self.quick_sort(p + 1, end, array)
 
     def cocktail(self, data):
         swapped = True

@@ -7,7 +7,7 @@ class PathingWindow:
     def __init__(self, window_id=None):
         self.window_id = window_id
         self.window_size = 800
-        self.side_cell_count = 41
+        self.side_cell_count = 33
         self.cell_size = self.window_size/self.side_cell_count
 
         self.min_x = 0
@@ -63,7 +63,8 @@ class PathingWindow:
 
     def initialize_grid(self):
         self.drawlist = dpg.add_drawlist(parent=self.window_id,
-                                         width=800, height=800, show=True)
+                                         width=self.window_size, height=self.window_size, show=True)
+                                         
         for row in self.pathing_host.grid:
             for node in row:
                 nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
@@ -74,6 +75,26 @@ class PathingWindow:
             self.clickhandler = dpg.add_mouse_down_handler(
                 callback=self.cell_clicked)
 
+    def change_side_len(self, changeamnt):
+        if (changeamnt < 0 and self.side_cell_count - abs(changeamnt) < 9) or (changeamnt > 0 and self.side_cell_count + abs(changeamnt) > 60):
+            return False
+
+        self.side_cell_count += changeamnt
+        self.cell_size = self.window_size/self.side_cell_count
+        return True
+
+    def grow_maze(self):
+        if not self.change_side_len(3):
+            return
+
+        self.reset()
+
+    def shrink_maze(self):
+        if not self.change_side_len(-3):
+            return
+
+        self.reset()
+    
     def cell_clicked(self):
         try:
             if not self.is_initial():
@@ -101,7 +122,7 @@ class PathingWindow:
 
         if (within_x and within_y):
             node = self.pathing_host.node_from_pos((x_cell, y_cell))
-            tempstate = node.get_state()
+            tempstate = node.state
             if clearing:
                 if (tempstate == "BARR"):
                     node.set_state_empty()
@@ -133,12 +154,12 @@ class PathingWindow:
         opensquares = (self.side_cell_count*self.side_cell_count-self.pathing_host.barr_count)
 
         if result:
-            self.message = f"{self.pathing_host.alg_name} "
+            self.message = f"{self.pathing_host.alg_name} ({self.side_cell_count}x{self.side_cell_count}) "
             self.message += f"Step {self.pathing_host.step_counter}:\n{result}\n"
             self.message += f"Nodes visited: {self.pathing_host.nodes_found} / {opensquares}"
 
         else:
-            self.message = f"{self.pathing_host.alg_name}: Complete in {self.pathing_host.step_counter} steps.\n"
+            self.message = f"{self.pathing_host.alg_name} ({self.side_cell_count}x{self.side_cell_count}): Complete in {self.pathing_host.step_counter} steps.\n"
             self.message += f"{self.pathing_host.nodes_found} / {opensquares} nodes visited in total. ({((self.pathing_host.nodes_found / opensquares) * 100):.2f}%)\n"
             self.message += f"Path of length {self.pathing_host.path_length} traced."
 

@@ -51,7 +51,7 @@ class AlgorithmWindow:
 
     def initialize_plot(self):
         self.plot = dpg.add_plot(
-            label=self.algorithms_host.alg_name, width=-1, height=-1, parent=self.window_id, no_menus=True,
+            label=f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size})", width=-1, height=-1, parent=self.window_id, no_menus=True,
             no_box_select=True,
             no_mouse_pos=True,
             crosshairs=False)
@@ -76,7 +76,7 @@ class AlgorithmWindow:
         self.set_limits()
 
     def reset_plot(self):
-        dpg.set_item_label(self.plot, f"{self.algorithms_host.alg_name}")
+        dpg.set_item_label(self.plot, f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size})")
         self.message = f"{self.algorithms_host.alg_name}"
 
         dpg.set_value(self.default_graph, [
@@ -94,7 +94,7 @@ class AlgorithmWindow:
             dpg.set_value(self.plots["green"], [
                           self.algorithms_host.data_x, self.algorithms_host.data_y])
 
-            self.message = f"{self.algorithms_host.alg_name}: Complete in {self.algorithms_host.step_counter} steps."
+            self.message = f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size}): Complete in {self.algorithms_host.step_counter} steps."
 
         else:
             self.clear_highlights()
@@ -105,7 +105,7 @@ class AlgorithmWindow:
                     dpg.set_value(self.plots[highlight], [x_highlight, [
                         self.algorithms_host.data_y[x_value] for x_value in x_highlight]])
 
-            self.message = f"{self.algorithms_host.alg_name} Step {self.algorithms_host.step_counter}: {new_data['message']}"
+            self.message = f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size}) Step {self.algorithms_host.step_counter}: {new_data['message']}"
 
     def clear_highlights(self):
         dpg.set_value(self.plots["red"], [[0], [0]])
@@ -116,8 +116,13 @@ class AlgorithmWindow:
         self.algorithms_host.set_random_data()
         self.reset_plot()
 
-    def set_speed(self, speed):
-        self.step_sleep = speed
+    def increase_dataset(self):
+        self.algorithms_host.change_data_len(5)
+        self.reset_plot()
+
+    def decrease_dataset(self):
+        self.algorithms_host.change_data_len(-5)
+        self.reset_plot()
 
     def next_step(self):
         value = self.algorithms_host.next_step()

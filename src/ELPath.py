@@ -7,7 +7,7 @@ import definitions as defs
 
 class ELPath():
     def __init__(self):
-        self.WINDOW_WIDTH, self.WINDOW_HEIGHT = 1200, 900
+        self.WINDOW_WIDTH, self.WINDOW_HEIGHT = 1250, 950
         self.SIDEBAR_WIDTH = 350
 
         self.step_sleep = 5
@@ -37,8 +37,8 @@ class ELPath():
     def viewport_config(self):
         # Necessary to set the window size
         dpg.setup_viewport()
-        dpg.set_viewport_width(1200)
-        dpg.set_viewport_height(950)
+        dpg.set_viewport_width(self.WINDOW_WIDTH)
+        dpg.set_viewport_height(self.WINDOW_HEIGHT)
 
     def __init_window(self):
         with dpg.font_registry():
@@ -118,6 +118,8 @@ class ELPath():
     def __mount_sorting(self, alg):
         self.algorithms = AlgorithmWindow(window_id=self.simulation_window)
         self.sorting_callbacks = {
+            "decrease": self.update_info(self.algorithms.decrease_dataset),
+            "increase": self.update_info(self.algorithms.increase_dataset),
             "next_step": self.update_info(self.algorithms.next_step),
             "original": self.update_info(self.algorithms.original_data),
             "randomize": self.update_info(self.algorithms.new_dataset),
@@ -131,7 +133,9 @@ class ELPath():
     def __mount_pathing(self, alg):
         self.pathing = PathingWindow(window_id=self.simulation_window)
         self.pathfinding_callbacks = {
+            "decrease": self.update_info(self.pathing.shrink_maze),
             "generate_maze": self.update_info(self.pathing.randmaze),
+            "increase": self.update_info(self.pathing.grow_maze),
             "next_step": self.update_info(self.pathing.next_step),
             "reset": self.update_info(self.pathing.reset),
             "retry": self.update_info(self.pathing.retry),
@@ -170,6 +174,12 @@ class ELPath():
         dpg.add_spacing(parent=self.controls_panel, count=5)
 
         dpg.add_text("Data:", parent=self.controls_panel)
+        self.transient_controls.append(dpg.add_button(label="Increase",
+                                                      parent=self.controls_panel, callback=self.sorting_callbacks["increase"]))
+        dpg.add_same_line(parent=self.controls_panel)
+        self.transient_controls.append(dpg.add_button(label="Decrease",
+                                                      parent=self.controls_panel, callback=self.sorting_callbacks["decrease"]))
+        
         self.transient_controls.append(dpg.add_button(label="Original Data",
                                                       parent=self.controls_panel, callback=self.sorting_callbacks["original"]))
         self.transient_controls.append(dpg.add_button(label="Randomize Data",
@@ -204,6 +214,11 @@ class ELPath():
         dpg.add_spacing(parent=self.controls_panel, count=5)
 
         dpg.add_text("Maze:", parent=self.controls_panel)
+        self.transient_controls.append(dpg.add_button(label="Grow",
+                                                      parent=self.controls_panel, callback=self.pathfinding_callbacks["increase"]))
+        dpg.add_same_line(parent=self.controls_panel)
+        self.transient_controls.append(dpg.add_button(label="Shrink",
+                                                      parent=self.controls_panel, callback=self.pathfinding_callbacks["decrease"]))
         self.transient_controls.append(dpg.add_button(label="Random Maze",
                                                       parent=self.controls_panel, callback=self.pathfinding_callbacks["generate_maze"]))
         self.transient_controls.append(dpg.add_button(label="Retry Maze",

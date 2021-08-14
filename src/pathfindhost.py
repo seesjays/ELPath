@@ -295,6 +295,8 @@ class PathfindingHost:
             self.end.set_alt_state("END")
             draw_func(self.end)
             yield
+        self.path_length -= 1
+        
 
     def next_step(self):
         try:
@@ -551,9 +553,6 @@ class Node:
 
     def __str__(self):
         return f"{self.state.lower()} node at x {self.x} and y {self.y}"
-
-    def get_state(self):
-        return self.state
 
     def set_state(self, state):
         self.altstate = self.state = state
