@@ -1,8 +1,5 @@
 import dearpygui.dearpygui as dpg
 from pathfindhost import PathfindingHost
-import consts as cnsts
-from random import randint
-from time import sleep
 from math import trunc
 
 
@@ -34,7 +31,7 @@ class PathingWindow:
 
         self.drawlist = None
         self.node_grid = {}
-        
+
         self.clickregistry = None
         self.clickhandler = None
 
@@ -61,7 +58,8 @@ class PathingWindow:
         for node in weightlist:
             weightednode = weightlist[node] + 10
             nodeident = self.node_grid[(node.x, node.y)]
-            dpg.configure_item(nodeident, fill=[weightednode, 255, weightednode, 255])
+            dpg.configure_item(
+                nodeident, fill=[weightednode, 255, weightednode, 255])
 
     def initialize_grid(self):
         self.drawlist = dpg.add_drawlist(parent=self.window_id,
@@ -73,7 +71,8 @@ class PathingWindow:
                 self.node_grid[(node.x, node.y)] = nodeident
 
         with dpg.handler_registry() as self.clickregistry:
-            self.clickhandler = dpg.add_mouse_down_handler(callback=self.cell_clicked)
+            self.clickhandler = dpg.add_mouse_down_handler(
+                callback=self.cell_clicked)
 
     def cell_clicked(self):
         if not self.is_initial():
@@ -147,8 +146,6 @@ class PathingWindow:
         self.initialize_grid()
 
     def retry(self):
-        #dpg.delete_item(self.drawlist, children_only=False)
-        #self.initialize_grid()
         self.pathing_host.retry_maze()
 
     def randmaze(self):

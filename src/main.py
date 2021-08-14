@@ -1,6 +1,5 @@
 import dearpygui.dearpygui as dpg
-from consts import *
-from ELPath import *
+from ELPath import ELPath
 
 ELPath = ELPath()
 

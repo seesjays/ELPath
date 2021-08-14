@@ -1,9 +1,5 @@
 import dearpygui.dearpygui as dpg
 from algohost import AlgorithmHost
-from pathfindhost import PathfindingHost
-import consts as cnsts
-from random import randint
-from time import sleep
 
 
 class AlgorithmWindow:
@@ -135,7 +131,7 @@ class AlgorithmWindow:
 
     def original_data(self):
         self.clear_highlights()
-        self.algorithms_host.reset_data()
+        self.algorithms_host.original_data()
         self.reset_plot()
 
     def unmount(self):

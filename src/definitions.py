@@ -60,7 +60,7 @@ DEFINITIONS = {
     "Cocktail Sort": [
         "Sorting, In-Place",
         ["Best: O(n)",
-        "Worst and Average: O(n^2)"],
+         "Worst and Average: O(n^2)"],
         """
         Cocktail sort is a variation of Bubble Sort that goes through the dataset in both directions.
         """
@@ -68,7 +68,7 @@ DEFINITIONS = {
 
     # pathing
     "Breadth-First Search": [
-        "Graph Search", 
+        "Graph Search",
         ["Best and worst case: O(|V| + |E|)"],
         """
         Breadth-First Search operates by examining all nodes at each depth
@@ -78,7 +78,7 @@ DEFINITIONS = {
     ],
 
     "Depth-First Search": [
-        "Graph Search", 
+        "Graph Search",
         ["Best and worst case: O(|V| + |E|)"],
         """
         Depth-First Search operates by examining all nodes along a branch before moving on
@@ -106,5 +106,5 @@ DEFINITIONS = {
         as well as a heuristic function (Which node is closest to the end?). 
         ELPath uses Manhattan distance for the heuristic,
         """
-        ],
+    ],
 }

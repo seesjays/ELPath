@@ -1,10 +1,6 @@
-from random import randint, choice
-from time import sleep
-import math
+from random import choice
 import queue
 from collections import deque
-from typing import Type
-
 
 # 7/20/21 - pathingalgs moved into host, for simplicity's sake,
 # and because I don't think generators are the way to go in this case.
@@ -30,7 +26,7 @@ class PathfindingHost:
         for y in range(sidecellcount):
             self.grid.append([])
             for x in range(sidecellcount):
-                node = Node((x, y), sidecellcount)
+                node = Node((x, y))
                 self.grid[y].append(node)
 
         self.start_point = (0, 0)
@@ -115,69 +111,8 @@ class PathfindingHost:
         self.end_point = None
         self.end = None
 
-    def update_node_neighbors(self, node):
-        right = self.node_from_pos((node.x+1, node.y))
-        left = self.node_from_pos((node.x-1, node.y))
-        up = self.node_from_pos((node.x, node.y+1))
-        down = self.node_from_pos((node.x, node.y-1))
-
-        if right is not None and right.state != "BARR":
-            node.neighbors.append(right)
-        if left is not None and left.state != "BARR":
-            node.neighbors.append(left)
-        if up is not None and up.state != "BARR":
-            node.neighbors.append(up)
-        if down is not None and down.state != "BARR":
-            node.neighbors.append(down)
-
-    def cost(self, node, node2):
-        return 1
-
-    def initialize_neighbors(self):
-        for row in self.grid:
-            for node in row:
-                node.origstate = node.state
-                self.update_node_neighbors(node)
-        self.initialized = True
-        self.current_algorithm = self.current_algorithm()
-
-    def retry_maze(self):
-        self.step_counter = 0
-
-        for row in self.grid:
-            for node in row:
-                node.neighbors = []
-                node.state = node.altstate = node.origstate
-                self.draw_node(node)
-
-        # start/end not placed
-        try:
-            self.add_start(self.node_from_pos(self.start_point))
-            self.add_end(self.node_from_pos(self.end_point))
-        except TypeError:  # start/end not initialized
-            self.start_point = (0, 0)
-            self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
-
-            self.start = self.node_from_pos(self.start_point)
-            self.end = self.node_from_pos(self.end_point)
-
-            self.add_start(self.node_from_pos(self.start_point))
-            self.add_end(self.node_from_pos(self.end_point))
-
-        self.initialized = False
-        self.current_algorithm = self.alg_list[self.alg_name]
-
-    def next_step(self):
-        try:
-            self.step_counter += 1
-            return next(self.current_algorithm)
-        except StopIteration:
-            self.step_counter -= 1
-            return False
-        # Notice that we don't return any actual data here, unlike the sorting next_step
-        # We do all the window updating work in the algorithm
-
     def rand_maze(self):
+        # Generates a maze using Prim's alg
         def emptys_at_dist_2(node):
             right = self.node_from_pos((node.x+2, node.y))
             left = self.node_from_pos((node.x-2, node.y))
@@ -221,8 +156,6 @@ class PathfindingHost:
         visited.add(startcell)
         stack.append(startcell)
 
-        sleep_tracker = 0
-
         while len(stack) > 0:
             current_cell = stack.pop()
             neighbors = emptys_at_dist_2(current_cell)
@@ -250,11 +183,6 @@ class PathfindingHost:
                     stack.append(unvis)
                     break
 
-            sleep_tracker += 1
-            if sleep_tracker == 10:
-                sleep_tracker = 0
-                # sleep(0.1)
-
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
 
@@ -276,7 +204,33 @@ class PathfindingHost:
             self.add_start(self.node_from_pos(self.start_point))
             self.add_end(self.node_from_pos(self.end_point))
 
-        self.retry_maze() # ok to run this now that we configure instead of creating new nodes
+        self.retry_maze()  # ok to run this now that we configure instead of creating new nodes
+
+    def retry_maze(self):
+        self.step_counter = 0
+
+        for row in self.grid:
+            for node in row:
+                node.neighbors = []
+                node.state = node.altstate = node.origstate
+                self.draw_node(node)
+
+        # start/end not placed
+        try:
+            self.add_start(self.node_from_pos(self.start_point))
+            self.add_end(self.node_from_pos(self.end_point))
+        except TypeError:  # start/end not initialized
+            self.start_point = (0, 0)
+            self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
+
+            self.start = self.node_from_pos(self.start_point)
+            self.end = self.node_from_pos(self.end_point)
+
+            self.add_start(self.node_from_pos(self.start_point))
+            self.add_end(self.node_from_pos(self.end_point))
+
+        self.initialized = False
+        self.current_algorithm = self.alg_list[self.alg_name]
 
     def rand_weights(self):
         # Generates a random list of weights for each node - to help along Dijkstras's
@@ -294,6 +248,34 @@ class PathfindingHost:
         self.path_length = 0
         self.nodes_found = 0
 
+    def update_node_neighbors(self, node):
+        right = self.node_from_pos((node.x+1, node.y))
+        left = self.node_from_pos((node.x-1, node.y))
+        up = self.node_from_pos((node.x, node.y+1))
+        down = self.node_from_pos((node.x, node.y-1))
+
+        if right is not None and right.state != "BARR":
+            node.neighbors.append(right)
+        if left is not None and left.state != "BARR":
+            node.neighbors.append(left)
+        if up is not None and up.state != "BARR":
+            node.neighbors.append(up)
+        if down is not None and down.state != "BARR":
+            node.neighbors.append(down)
+
+    def initialize_neighbors(self):
+        for row in self.grid:
+            for node in row:
+                node.origstate = node.state
+                self.update_node_neighbors(node)
+        self.initialized = True
+        self.current_algorithm = self.current_algorithm()
+
+    def manhattanheur(self, a, b):
+        x1, y1 = a
+        x2, y2 = b
+        return abs(x1 - x2) + abs(y1 - y2)
+
     def tracepath(self, draw_func, came_from):
         current = self.end
         path = []
@@ -310,8 +292,18 @@ class PathfindingHost:
             draw_func(self.end)
             yield
 
-    # algs
-      
+    def next_step(self):
+        try:
+            self.step_counter += 1
+            return next(self.current_algorithm)
+        except StopIteration:
+            self.step_counter -= 1
+            return False
+        # Notice that we don't return any actual data here, unlike the sorting next_step
+        # We do all the window updating work in the algorithm
+
+    # Algorithms
+
     def breadthfirst(self, draw_func):
         self.reset_info()
 
@@ -345,7 +337,6 @@ class PathfindingHost:
                 draw_func(nxt)
             yield f"Examining node at ({current.x}, {current.y})"
 
-
             current.reset_alt_state()
             current.set_state_closed()
             draw_func(current)
@@ -376,7 +367,6 @@ class PathfindingHost:
             self.end.set_alt_state("END")
             draw_func(self.end)
 
-
             if current == self.end:
                 self.nodes_found += 1
                 yield "Visited end node, retracing path."
@@ -402,7 +392,7 @@ class PathfindingHost:
 
             current.set_state_closed()
             draw_func(current)
-        
+
         for stepback in self.tracepath(draw_func, came_from):
             yield "Retracing Path"
 
@@ -450,7 +440,8 @@ class PathfindingHost:
             weights_list = []
 
             for neighbor in lowest.neighbors:
-                weights_list.append((neighbor, "Visited" if neighbor.state == "CLOSE" else weights[neighbor]))
+                weights_list.append(
+                    (neighbor, "Visited" if neighbor.state == "CLOSE" else weights[neighbor]))
                 if neighbor in vertset:
                     alt = distances[lowest] + weights[neighbor]
                     if alt < distances[neighbor]:
@@ -460,7 +451,7 @@ class PathfindingHost:
                     draw_func(neighbor)
 
             outmessage = f"Examining neighbors around node at ({lowest.x}, {lowest.y}).\n"
-            
+
             scorelisting = ""
             for score in weights_list:
                 scorelisting += f"({score[0].x}, {score[0].y}): {score[1]}\n"
@@ -476,7 +467,7 @@ class PathfindingHost:
 
     def astar(self, draw_func):
         self.reset_info()
-        
+
         count = 0
         open_set = queue.PriorityQueue()
         open_set.put((0, count, self.start))
@@ -489,7 +480,7 @@ class PathfindingHost:
 
         open_set_hash = {self.start}
 
-        while not open_set.empty():            
+        while not open_set.empty():
             current = open_set.get()[2]
             current.set_alt_state("SPCL")
             self.nodes_found += 1
@@ -501,7 +492,6 @@ class PathfindingHost:
             self.end.set_alt_state("END")
             draw_func(self.end)
 
-
             if current == self.end:
                 yield "Visited end node, retracing path."
                 break
@@ -510,7 +500,8 @@ class PathfindingHost:
 
             for neighbor in current.neighbors:
                 temp_g_score = g_score[current] + 1
-                f_score_list.append((neighbor, "Visited" if neighbor.state == "CLOSE" else f_score[neighbor]))
+                f_score_list.append(
+                    (neighbor, "Visited" if neighbor.state == "CLOSE" else f_score[neighbor]))
                 if temp_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = temp_g_score
@@ -523,10 +514,9 @@ class PathfindingHost:
                         neighbor.set_state_open()
 
                         draw_func(neighbor)
-                
 
             outmessage = f"Examining neighbors around node at ({current.x}, {current.y}).\n"
-            
+
             scorelisting = ""
             for score in f_score_list:
                 scorelisting += f"({score[0].x}, {score[0].y}): {score[1]}\n"
@@ -537,18 +527,13 @@ class PathfindingHost:
             if current != self.start:
                 current.set_state_closed()
                 draw_func(current)
-            
+
         for stepback in self.tracepath(draw_func, came_from):
             yield "Retracing Path"
 
-    def manhattanheur(self, a, b):
-        x1, y1 = a
-        x2, y2 = b
-        return abs(x1 - x2) + abs(y1 - y2)
-
 
 class Node:
-    def __init__(self, pos, grid_side_length):
+    def __init__(self, pos):
         self.x, self.y = pos
         self.state = "EMPTY"
         self.altstate = "EMPTY"
@@ -559,7 +544,6 @@ class Node:
         # Thus, in such cases, it makes sense to maintain the actual state
         # but use altstate as a facade of sorts, to clearly visualize what's necessary.
         self.neighbors = []
-        self.sidecount = grid_side_length
 
     def __str__(self):
         return f"{self.state.lower()} node at x {self.x} and y {self.y}"

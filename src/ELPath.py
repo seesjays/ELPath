@@ -1,13 +1,15 @@
 import dearpygui.dearpygui as dpg
 from time import sleep
 from algowindow import AlgorithmWindow
-import consts as cnsts
 from pathingwindow import PathingWindow
 import definitions as defs
 
 
 class ELPath():
     def __init__(self):
+        self.WINDOW_WIDTH, self.WINDOW_HEIGHT = 1200, 900
+        self.SIDEBAR_WIDTH = 350
+
         self.step_sleep = 5
         self.algorithms = None
         self.pathing = None
@@ -21,7 +23,6 @@ class ELPath():
         self.ELPath_window = None
         self.controls_panel = None
         self.simulation_window = None
-        self.side_panel = None
 
         self.combobox = dpg.generate_uuid()
         self.sleepslider = dpg.generate_uuid()
@@ -34,27 +35,25 @@ class ELPath():
         self.__mount(self.mode, "Breadth-First Search")
 
     def viewport_config(self):
+        # Necessary to set the window size
         dpg.setup_viewport()
         dpg.set_viewport_width(1200)
         dpg.set_viewport_height(950)
 
     def __init_window(self):
         with dpg.font_registry():
-            # add font (set as default for entire app)
             dpg.add_font(
                 "resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20, default_font=True)
             dpg.set_global_font_scale(1.2)
 
         with dpg.window(label="ELPath") as self.ELPath_window:
-            with dpg.child(label="Controls_Info", width=cnsts.SIDEBAR_WIDTH-20, pos=[10, 10], border=False, no_scrollbar=True) as self.side_panel:
-                with dpg.collapsing_header(label="Controls") as self.controls_panel:
+            with dpg.child(label="Controls_Info", width=self.SIDEBAR_WIDTH, pos=[10, 10], border=False, no_scrollbar=True):
+                with dpg.collapsing_header(label="Controls", default_open=True) as self.controls_panel:
                     pass
-                with dpg.collapsing_header(label="Info"):
+                with dpg.collapsing_header(label="Info", default_open=True):
                     self.infotext = dpg.add_text("alginfo", wrap=300)
-                    dpg.set_value(
-                        self.infotext, "The quick brown fox jumps over the lazy dog")
 
-            with dpg.child(label="Simulation", height=815, width=815, no_scrollbar=True, pos=[cnsts.SIDEBAR_WIDTH, 50]) as simulation_window:
+            with dpg.child(label="Simulation", height=815, width=815, no_scrollbar=True, pos=[self.SIDEBAR_WIDTH+20, 50]) as simulation_window:
                 self.simulation_window = simulation_window
 
         dpg.set_primary_window(self.ELPath_window, True)
@@ -71,26 +70,48 @@ class ELPath():
     def __unmount(self):
         dpg.delete_item(self.controls_panel,
                         children_only=True)  # remove controls
+
         if self.mode == "Sorting":
             self.algorithms.unmount()
             self.algorithms = None
         elif self.mode == "Pathfinding":
             self.pathing.unmount()
             self.pathing = None
+
+        # Should be cleared in the unmounting functions, but this is here for extra insurance.
         dpg.delete_item(self.simulation_window, children_only=True)
 
     def change_algorithm(self):
         newalg = dpg.get_value(self.combobox)
         newalgmode = self.all_algorithms[newalg]
 
+        # User was on a sorting simulation and swapped to another sorting simulation
         if self.mode == "Sorting" and newalgmode == self.mode:
             self.sorting_callbacks["set_algorithm"](newalg)
+
+        # User was on a pathfinding simulation and swapped to another sorting simulation
         elif self.mode == "Pathfinding" and newalgmode == self.mode:
             self.pathfinding_callbacks["set_algorithm"](newalg)
-        else:  # mismatch
+
+        # User swapped between a sorting/pathfinding simulation
+        else:
             self.__unmount()
             self.__mount(newalgmode, newalg)
 
+        self.update_info_no_wrapper()
+        self.update_info_alg_definition()
+
+    def __mount(self, newmode, newalg):
+        if (newmode == "Sorting"):
+            self.__mount_sorting(newalg)
+            self.__link_sorting_controls()
+            self.curr_window = self.algorithms
+        else:
+            self.__mount_pathing(newalg)
+            self.__link_pathing_controls()
+            self.curr_window = self.pathing
+
+        self.mode = newmode
         self.update_info_no_wrapper()
         self.update_info_alg_definition()
 
@@ -99,8 +120,8 @@ class ELPath():
         self.sorting_callbacks = {
             "next_step": self.update_info(self.algorithms.next_step),
             "original": self.update_info(self.algorithms.original_data),
-            "run_sim": self.run_sim,
             "randomize": self.update_info(self.algorithms.new_dataset),
+            "run_sim": self.run_sim,
             "set_algorithm": self.algorithms.change_algorithm
         }
         self.algorithms.initialize_plot()
@@ -118,21 +139,7 @@ class ELPath():
             "set_algorithm": self.pathing.change_algorithm,
         }
         self.pathing.initialize_grid()
-        # self.pathing.change_algorithm(alg)
-
-    def __mount(self, newmode, newalg):
-        if (newmode == "Sorting"):
-            self.__mount_sorting(newalg)
-            self.__link_sorting_controls()
-            self.curr_window = self.algorithms
-        else:
-            self.__mount_pathing(newalg)
-            self.__link_pathing_controls()
-            self.curr_window = self.pathing
-
-        self.mode = newmode
-        # self.update_info_no_wrapper()
-        # self.update_info_alg_definition()
+        self.pathing.change_algorithm(alg)
 
     def __link_sorting_controls(self):
         self.transient_controls = []
@@ -221,29 +228,8 @@ class ELPath():
         for control in self.transient_controls:
             dpg.configure_item(control, enabled=True)
 
-    def run_pathfinding(self, sender):
-        dpg.configure_item("algorithm_combobox", enabled=False)
-        dpg.configure_item("next_step_button", enabled=False)
-        dpg.configure_item("random_maze", enabled=False)
-        dpg.configure_item("retry_button", enabled=False)
-        dpg.configure_item("reset_button", enabled=False)
-
-        while dpg.get_value(sender):
-            updated = self.pathing.next_step()
-            sleep(dpg.get_value(self.sleepslider)/100)
-            self.update_info_no_wrapper()
-
-            if (not updated):
-                dpg.set_value(sender, False)
-                break
-
-        dpg.configure_item("algorithm_combobox", enabled=True)
-        dpg.configure_item("next_step_button", enabled=True)
-        dpg.configure_item("random_maze", enabled=True)
-        dpg.configure_item("retry_button", enabled=True)
-        dpg.configure_item("reset_button", enabled=True)
-
     # Info
+
     def update_info(self, func):
         def wrapper():
             func()
