@@ -6,11 +6,15 @@ An algorithm visualizer.
 ELPath is lovingly built using DearPyGui as a basis for its GUI and plotting functions.
 This is aimed at providing understandable visualizations of common sorting and pathfinding algorithms.
 
+Visualizations include Quick Sort, Merge Sort, Bubble Sort, Insertion Sort, Selection Sort, Cocktail Sort, Breadth and Depth-First Search, Dijkstra's Algorithm, and A* Search.
+
+The scale and execution speed of the demonstrations can be modiifed by the user, and a handy maze generation feature is included in the pathfinding to simplify the process of simulating algorithms in identical and fair conditions.
+
 ![Sorting](https://user-images.githubusercontent.com/39662993/129440233-a326e4be-00b0-4771-b467-158f8f74c968.png)
 
-Development has ceased, but breaking changes to ELPath due to DearPyGui will be noticed and resolved periodically.
-
 ![Maze generation feature](https://user-images.githubusercontent.com/39662993/129440181-32e5d95f-ba5b-4e30-8689-7e363f91be6b.png)
+
+Development has officially ceased, but breaking changes to ELPath due to DearPyGui will be noticed and resolved periodically.
 
 # Dependencies:
 DearPyGui v0.8.62
