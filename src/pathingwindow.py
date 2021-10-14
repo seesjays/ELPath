@@ -4,16 +4,17 @@ from math import trunc
 
 
 class PathingWindow:
-    def __init__(self, window_id=None):
-        self.window_id = window_id
-        self.window_size = 800
+    def __init__(self, window_tag=None):
+        self.window_tag = window_tag
+        self.window_size = dpg.get_item_height(
+            window_tag) - 16 if window_tag else 800
         self.side_cell_count = 33
         self.cell_size = self.window_size/self.side_cell_count
 
         self.min_x = 0
         self.min_y = 0
-        self.max_x = 800
-        self.max_y = 800
+        self.max_x = self.window_size
+        self.max_y = self.window_size
 
         self.pathing_host = PathfindingHost(
             self.side_cell_count, lambda node: self.draw_node(node), self.draw_weights)
@@ -62,18 +63,38 @@ class PathingWindow:
                 nodeident, fill=[weightednode, 255, weightednode, 255])
 
     def initialize_grid(self):
-        self.drawlist = dpg.add_drawlist(parent=self.window_id,
-                                         width=self.window_size, height=self.window_size, show=True)
-                                         
+        self.drawlist = dpg.add_drawlist(parent=self.window_tag,
+                                         width=self.window_size+1, height=self.window_size+1, show=True)
+
+        span = 0
         for row in self.pathing_host.grid:
             for node in row:
                 nodeident = dpg.draw_rectangle([self.min_x+node.x*self.cell_size, self.min_y+node.y*self.cell_size], [self.min_x+(
-                    node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=[0, 0, 0, 255], thickness=4, fill=self.colors[node.state], parent=self.drawlist)
+                    node.x+1)*self.cell_size, (node.y+1)*self.cell_size], color=self.colors[node.state], fill=self.colors[node.state], parent=self.drawlist)
                 self.node_grid[(node.x, node.y)] = nodeident
+            span += self.cell_size
 
+        for col in range(len(self.pathing_host.grid)):
+            dpg.draw_rectangle([self.min_x+col*self.cell_size, 0], [self.min_x+(
+                    col+1)*self.cell_size, span], color=[0, 0, 0, 255], thickness=2, fill=[0, 0, 0, 0], parent=self.drawlist)
+            
+            dpg.draw_rectangle([0, self.min_y+col*self.cell_size], [span, self.min_y+(
+                    col+1)*self.cell_size], color=[0, 0, 0, 255], thickness=2, fill=[0, 0, 0, 0], parent=self.drawlist)
+
+        dpg.draw_line([0, 0], [0, self.window_size], color=[
+                      0, 0, 0], thickness=4, parent=self.drawlist)
+        dpg.draw_line([0, 0], [self.window_size, 0], color=[
+                      0, 0, 0], thickness=4, parent=self.drawlist)
+        dpg.draw_line([self.window_size, self.window_size], [
+                      0, self.window_size], color=[0, 0, 0], thickness=4, parent=self.drawlist)
+        dpg.draw_line([self.window_size, self.window_size], [
+                      self.window_size, 0], color=[0, 0, 0], thickness=4, parent=self.drawlist)  
+        
         with dpg.handler_registry() as self.clickregistry:
             self.clickhandler = dpg.add_mouse_down_handler(
                 callback=self.cell_clicked)
+
+
 
     def change_side_len(self, changeamnt):
         if (changeamnt < 0 and self.side_cell_count - abs(changeamnt) < 9) or (changeamnt > 0 and self.side_cell_count + abs(changeamnt) > 60):
@@ -94,7 +115,7 @@ class PathingWindow:
             return
 
         self.reset()
-    
+
     def cell_clicked(self):
         try:
             if not self.is_initial():
@@ -106,7 +127,7 @@ class PathingWindow:
         genpos = dpg.get_mouse_pos()
         genpos[1] -= 15  # account for window padding
 
-        if (genpos[1] > self.max_y or genpos[1] < self.min_y or genpos[0] < 0 or genpos[0] > self.max_x or dpg.get_active_window() != self.window_id):
+        if (genpos[1] > self.max_y or genpos[1] < self.min_y or genpos[0] < 0 or genpos[0] > self.max_x or dpg.get_active_window() != self.window_tag):
             return
 
         pos = dpg.get_drawing_mouse_pos()
@@ -151,7 +172,8 @@ class PathingWindow:
 
         result = self.pathing_host.next_step()
 
-        opensquares = (self.side_cell_count*self.side_cell_count-self.pathing_host.barr_count)
+        opensquares = (self.side_cell_count *
+                       self.side_cell_count-self.pathing_host.barr_count)
 
         if result:
             self.message = f"{self.pathing_host.alg_name} ({self.side_cell_count}x{self.side_cell_count}) "

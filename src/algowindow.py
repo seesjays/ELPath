@@ -3,14 +3,14 @@ from algohost import AlgorithmHost
 
 
 class AlgorithmWindow:
-    def __init__(self, window_id=None):
+    def __init__(self, window_tag=None):
         self.algorithms_host = AlgorithmHost()
 
         self.message = self.algorithms_host.alg_name
 
         self.highlight_list = []
 
-        self.window_id = window_id
+        self.window_tag = window_tag
 
         self.plot = None
         self.plot_x_axis = None
@@ -25,18 +25,21 @@ class AlgorithmWindow:
 
     def load_themes(self):
         with dpg.theme() as red:
-            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_color(dpg.mvPlotCol_Fill,
                                 (196, 78, 82), category=dpg.mvThemeCat_Plots)
         with dpg.theme() as green:
-            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_color(dpg.mvPlotCol_Fill,
                                 (85, 168, 104), category=dpg.mvThemeCat_Plots)
         with dpg.theme() as yellow:
-            dpg.add_theme_color(dpg.mvPlotCol_Fill,
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_color(dpg.mvPlotCol_Fill,
                                 (204, 185, 116), category=dpg.mvThemeCat_Plots)
 
-        dpg.set_item_theme(self.plots["red"], red)
-        dpg.set_item_theme(self.plots["green"], green)
-        dpg.set_item_theme(self.plots["yellow"], yellow)
+        dpg.bind_item_theme(self.plots["red"], red)
+        dpg.bind_item_theme(self.plots["green"], green)
+        dpg.bind_item_theme(self.plots["yellow"], yellow)
 
     def set_limits(self):
         # Because we initialize our plots starting at 0 now, we just need to see everything from -1 (to include the 0 position) to
@@ -51,7 +54,7 @@ class AlgorithmWindow:
 
     def initialize_plot(self):
         self.plot = dpg.add_plot(
-            label=f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size})", width=-1, height=-1, parent=self.window_id, no_menus=True,
+            label=f"{self.algorithms_host.alg_name} (n = {self.algorithms_host.data_set_size})", width=-1, height=-1, parent=self.window_tag, no_menus=True,
             no_box_select=True,
             no_mouse_pos=True,
             crosshairs=False)
