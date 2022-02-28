@@ -35,6 +35,17 @@ DEFINITIONS = {
         """
     ],
 
+    "Optimized Bubble Sort": [
+        "Sorting, In-Place",
+        ["Best: O(n)",
+         "Worst and Average: O(n^2)"],
+        """
+        Optimized Bubble Sort improves upon the speed of regular Bubble Sort by avoiding
+        the last n-1 elements each loop, since those had already been placed 
+        at their proper positions by the nature of Bubble Sort.
+        """
+    ],
+
     "Insertion Sort": [
         "Sorting, In-Place",
         ["Best: O(n)",

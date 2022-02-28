@@ -14,7 +14,8 @@ class AlgorithmHost:
         self.alg_list = {
             "Quick Sort": (lambda: self.quick_sort(0, self.data_set_size-1, self.data_y)),
             "Merge Sort": (lambda: self.merge(self.data_y)),
-            "Bubble Sort": (lambda: self.bubble(self.data_y)),
+            "Bubble Sort": (lambda: self.regbubble(self.data_y)),
+            "Optimized Bubble Sort": (lambda: self.bubble(self.data_y)),
             "Insertion Sort": (lambda: self.insertion(self.data_y)),
             "Selection Sort": (lambda: self.selection(self.data_y)),
             "Cocktail Sort": (lambda: self.cocktail(self.data_y)),
@@ -65,6 +66,30 @@ class AlgorithmHost:
             return False
 
     # Algorithms
+
+    def regbubble(self, data):
+        n = len(data)
+        changemade = False
+        while not changemade:
+            changemade = True
+            for i in range(n-1):
+                j = i + 1
+                if data[j] < data[i]:
+                    yield {
+                        "red": [i, j],
+                        "message": "Unsorted pair found"
+                    }
+                    data[i], data[j] = data[j], data[i]
+                    yield {
+                        "green": [i, j],
+                        "message": "Unsorted pair swapped"
+                    }
+                    changemade = False
+                else:
+                    yield {
+                        "green": [i, j],
+                        "message": "Pair already sorted"
+                    }
 
     def bubble(self, data):
         n = len(data)
