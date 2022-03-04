@@ -151,87 +151,128 @@ class ELPath():
     def __link_sorting_controls(self):
         self.transient_controls = []
 
-        dpg.add_text("Algorithm:", parent=self.controls_panel)
-        self.transient_controls.append(dpg.add_combo(label="", parent=self.controls_panel,
-                                                     default_value=self.algorithms.algorithms_host.alg_name,
-                                                     items=list(
-                                                         self.all_algorithms.keys()),
-                                                     callback=self.change_algorithm,
-                                                     width=300,
-                                                     tag=self.combobox))
+        def algobox():
+            dpg.add_text("Algorithm:", parent=self.controls_panel)
+            combobox = dpg.add_combo(label="", parent=self.controls_panel,
+                                     default_value=self.algorithms.algorithms_host.alg_name,
+                                     items=list(
+                                         self.all_algorithms.keys()),
+                                     callback=self.change_algorithm,
+                                     width=300,
+                                     tag=self.combobox)
 
+            self.transient_controls.append(combobox)
+
+        def runandnext():
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                runcheck = dpg.add_checkbox(
+                    label="Run", callback=self.sorting_callbacks["run_sim"])
+                nextstep = dpg.add_button(
+                    label="Next Step", callback=self.sorting_callbacks["next_step"])
+
+                self.transient_controls.append(nextstep)
+
+        def datacontrols():
+            dpg.add_text("Data:", parent=self.controls_panel)
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                increase = dpg.add_button(label="Increase",
+                                          callback=self.sorting_callbacks["increase"])
+                decrease = dpg.add_button(label="Decrease",
+                                          callback=self.sorting_callbacks["decrease"])
+
+                self.transient_controls.append(increase)
+                self.transient_controls.append(decrease)
+
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                original = dpg.add_button(label="Original Data",
+                                          callback=self.sorting_callbacks["original"])
+                randomize = dpg.add_button(label="Randomize Data",
+                                           callback=self.sorting_callbacks["randomize"])
+
+                self.transient_controls.append(original)
+                self.transient_controls.append(randomize)
+
+        def speedcontrols():
+            dpg.add_text("Speed:", parent=self.controls_panel)
+            dpg.add_slider_int(label="", parent=self.controls_panel, width=300, default_value=self.step_sleep, clamped=True,
+                               min_value=0, max_value=50, tag=self.sleepslider)
+
+        algobox()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
-        dpg.add_checkbox(label="Run",
-                         parent=self.controls_panel, callback=self.sorting_callbacks["run_sim"])
-
-        dpg.add_same_line(parent=self.controls_panel)
-        self.transient_controls.append(dpg.add_button(label="Next Step",
-                                                      parent=self.controls_panel, callback=self.sorting_callbacks["next_step"]))
-
+        runandnext()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
-        dpg.add_text("Speed:", parent=self.controls_panel)
-        dpg.add_slider_int(label="", parent=self.controls_panel, width=300,
-                           default_value=self.step_sleep, clamped=True, min_value=0, max_value=50, tag=self.sleepslider)
-
+        speedcontrols()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
-        dpg.add_text("Data:", parent=self.controls_panel)
-        self.transient_controls.append(dpg.add_button(label="Increase",
-                                                      parent=self.controls_panel, callback=self.sorting_callbacks["increase"]))
-        dpg.add_same_line(parent=self.controls_panel)
-        self.transient_controls.append(dpg.add_button(label="Decrease",
-                                                      parent=self.controls_panel, callback=self.sorting_callbacks["decrease"]))
-
-        self.transient_controls.append(dpg.add_button(label="Original Data",
-                                                      parent=self.controls_panel, callback=self.sorting_callbacks["original"]))
-        self.transient_controls.append(dpg.add_button(label="Randomize Data",
-                                                      parent=self.controls_panel, callback=self.sorting_callbacks["randomize"]))
+        datacontrols()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
     def __link_pathing_controls(self):
         self.transient_controls = []
 
-        dpg.add_text("Algorithm:", parent=self.controls_panel)
-        self.transient_controls.append(dpg.add_combo(label="", parent=self.controls_panel,
-                                                     default_value=self.pathing.pathing_host.alg_name,
-                                                     items=list(
-                                                         self.all_algorithms.keys()),
-                                                     callback=self.change_algorithm,
-                                                     width=300, tag=self.combobox))
+        def algobox():
+            dpg.add_text("Algorithm:", parent=self.controls_panel)
+            combobox = dpg.add_combo(label="", parent=self.controls_panel,
+                                     default_value=self.pathing.pathing_host.alg_name,
+                                     items=list(
+                                         self.all_algorithms.keys()),
+                                     callback=self.change_algorithm,
+                                     width=300, tag=self.combobox)
 
+            self.transient_controls.append(combobox)
+
+        def runandnext():
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                runcheck = dpg.add_checkbox(
+                    label="Run", callback=self.pathfinding_callbacks["run_sim"])
+                nextstep = dpg.add_button(
+                    label="Next Step", callback=self.pathfinding_callbacks["next_step"])
+
+                self.transient_controls.append(nextstep)
+
+        def speedcontrols():
+            dpg.add_text("Speed:", parent=self.controls_panel)
+            dpg.add_slider_int(label="", parent=self.controls_panel, width=300,
+                               default_value=self.step_sleep, clamped=True, min_value=0, max_value=100, tag=self.sleepslider)
+
+        def sizecontrols():
+            dpg.add_text("Maze:", parent=self.controls_panel)
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                grow = dpg.add_button(
+                    label="Grow", callback=self.pathfinding_callbacks["increase"])
+                shrink = dpg.add_button(
+                    label="Shrink", callback=self.pathfinding_callbacks["decrease"])
+
+                self.transient_controls.append(grow)
+                self.transient_controls.append(shrink)
+
+        def mazecontrols():
+            with dpg.group(horizontal=True, parent=self.controls_panel):
+                randomize = dpg.add_button(
+                    label="Random Maze", callback=self.pathfinding_callbacks["generate_maze"])
+                retry = dpg.add_button(
+                    label="Retry Maze", callback=self.pathfinding_callbacks["retry"])
+                reset = dpg.add_button(
+                    label="Reset", parent=self.controls_panel, callback=self.pathfinding_callbacks["reset"])
+
+                self.transient_controls.append(randomize)
+                self.transient_controls.append(retry)
+                self.transient_controls.append(reset)
+        
+        algobox()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
-        with dpg.group(horizontal=True, parent=self.controls_panel):
-            dpg.add_checkbox(label="Run",
-                             callback=self.pathfinding_callbacks["run_sim"])
-
-            self.transient_controls.append(dpg.add_button(label="Next Step",
-                                                          callback=self.pathfinding_callbacks["next_step"]))
-
+        runandnext()
         dpg.add_spacer(parent=self.controls_panel, width=5)
 
-        dpg.add_text("Speed:", parent=self.controls_panel)
-        dpg.add_slider_int(label="", parent=self.controls_panel, width=300,
-                           default_value=self.step_sleep, clamped=True, min_value=0, max_value=100, tag=self.sleepslider)
-
+        speedcontrols()
         dpg.add_spacer(parent=self.controls_panel, width=5)
-        dpg.add_text("Maze:", parent=self.controls_panel)
-        with dpg.group(horizontal=True, parent=self.controls_panel):
-            self.transient_controls.append(dpg.add_button(label="Grow",
-                                                          callback=self.pathfinding_callbacks["increase"]))
-            self.transient_controls.append(dpg.add_button(label="Shrink",
-                                                          callback=self.pathfinding_callbacks["decrease"]))
 
-        with dpg.group(horizontal=True, parent=self.controls_panel):
-            self.transient_controls.append(dpg.add_button(label="Random Maze",
-                                                          callback=self.pathfinding_callbacks["generate_maze"]))
-            self.transient_controls.append(dpg.add_button(label="Retry Maze",
-                                                          callback=self.pathfinding_callbacks["retry"]))
-
-        self.transient_controls.append(dpg.add_button(label="Reset",
-                                                      parent=self.controls_panel, callback=self.pathfinding_callbacks["reset"]))
+        sizecontrols()
+        mazecontrols()
+        dpg.add_spacer(parent=self.controls_panel, width=5)
 
     def run_sim(self, sender):
         for control in self.transient_controls:
