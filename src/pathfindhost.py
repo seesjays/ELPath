@@ -21,26 +21,20 @@ That's what drove this decision.
 class PathfindingHost:
     def __init__(self, sidecellcount, draw_node_func, draw_weights_func, algorithm="Breadth-First Search"):
         self.sidecellcount = sidecellcount
-
         self.grid = []
         for y in range(sidecellcount):
             self.grid.append([])
             for x in range(sidecellcount):
                 node = Node((x, y))
                 self.grid[y].append(node)
-
         self.start_point = (0, 0)
         self.end_point = (sidecellcount-1, sidecellcount-1)
-
         self.start = self.node_from_pos(self.start_point)
         self.end = self.node_from_pos(self.end_point)
-
         self.start.set_state_start()
         self.end.set_state_end()
-
         self.draw_node = draw_node_func
         self.draw_weights = draw_weights_func
-
         # algorithms
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
@@ -50,9 +44,7 @@ class PathfindingHost:
         }
         self.alg_name = algorithm
         self.current_algorithm = self.alg_list[self.alg_name]
-
         self.initialized = False
-
         # Info
         self.step_counter = 0
         self.path_length = 0
@@ -67,7 +59,6 @@ class PathfindingHost:
     def node_from_pos(self, pos):
         y = pos[1]
         x = pos[0]
-
         if 0 <= x < self.sidecellcount and 0 <= y < self.sidecellcount:
             return self.grid[y][x]
         else:
@@ -81,9 +72,7 @@ class PathfindingHost:
             self.draw_node(self.start)
         except:
             self.start_point = (0, 0)
-
             self.start = self.node_from_pos(self.start_point)
-
             self.add_start(self.node_from_pos(self.start_point))
 
     def remove_start(self):
@@ -101,9 +90,7 @@ class PathfindingHost:
             self.draw_node(self.end)
         except:
             self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
-
             self.end = self.node_from_pos(self.end_point)
-
             self.add_end(self.node_from_pos(self.end_point))
 
     def remove_end(self):
@@ -120,7 +107,6 @@ class PathfindingHost:
             left = self.node_from_pos((node.x-2, node.y))
             up = self.node_from_pos((node.x, node.y+2))
             down = self.node_from_pos((node.x, node.y-2))
-
             outlist = []
             if right is not None and right.state == "EMPTY":
                 outlist.append(right)
@@ -130,18 +116,15 @@ class PathfindingHost:
                 outlist.append(up)
             if down is not None and down.state == "EMPTY":
                 outlist.append(down)
-
             return outlist
         if self.start is not None:
             self.remove_start()
         if self.end is not None:
             self.remove_end()
-
         for row in self.grid:
             for node in row:
                 node.set_state_barrier()
                 self.draw_node(node)
-
         open_nodes = []
         for i in range(1, len(self.grid)-1):
             for j in range(1, len(self.grid)-1):
@@ -150,59 +133,45 @@ class PathfindingHost:
                     node.set_state_empty()
                     self.draw_node(node)
                     open_nodes.append(node)
-
         visited = set()
         stack = deque()
-
         startcell = choice(open_nodes)
         visited.add(startcell)
         stack.append(startcell)
-
         while len(stack) > 0:
             current_cell = stack.pop()
             neighbors = emptys_at_dist_2(current_cell)
-
             prevstate = current_cell.state
             current_cell.set_state_closed()
             self.draw_node(current_cell)
-
             for neighbor in neighbors:
                 if neighbor not in visited:
                     stack.append(current_cell)
-
                     unvis = choice(neighbors)
                     while (unvis in visited):
                         unvis = choice(neighbors)
-
                     between = ((unvis.x + current_cell.x)//2,
                                (unvis.y + current_cell.y)//2)
                     between = self.node_from_pos(between)
-
                     between.set_state_empty()
                     self.draw_node(between)
-
                     visited.add(unvis)
                     stack.append(unvis)
                     break
-
             current_cell.set_state(prevstate)
             self.draw_node(current_cell)
-
         startnode = choice(open_nodes)
         endnode = choice(open_nodes)
         while endnode == startnode:
             endnode = choice(open_nodes)
-
         try:
             self.add_start(startnode)
             self.add_end(endnode)
         except TypeError:  # start/end not initialized
             self.start_point = (0, 0)
             self.end_point = (self.sidecellcount-1, self.sidecellcount-1)
-
             self.start = self.node_from_pos(self.start_point)
             self.end = self.node_from_pos(self.end_point)
-
             self.add_start(self.node_from_pos(self.start_point))
             self.add_end(self.node_from_pos(self.end_point))
 
