@@ -17,4 +17,4 @@ The scale and execution speed of the demonstrations can be modiifed by the user,
 Development has officially ceased, but breaking changes to ELPath due to DearPyGui will be noticed and resolved periodically.
 
 # Dependencies:
-DearPyGui v0.8.62
+DearPyGui v1.5.1
