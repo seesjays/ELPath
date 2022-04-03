@@ -41,7 +41,7 @@ class PathfindingHost:
         self.draw_node = draw_node_func
         self.draw_weights = draw_weights_func
 
-        # algorithms
+        # sorting algorithms
         self.alg_list = {
             "Breadth-First Search": (lambda: self.breadthfirst(self.draw_node)),
             "Depth-First Search": (lambda: self.depthfirst(self.draw_node)),
