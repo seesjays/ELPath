@@ -18,3 +18,5 @@ Development has officially ceased, but breaking changes to ELPath due to DearPyG
 
 # Dependencies:
 DearPyGui v1.5.1
+
+# Do note that I've made a web-based successor to ELPath, particularly for improved sorting demonstrations: [Sorgra.](https://github.com/ChrisOh431/Sorgra)
