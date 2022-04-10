@@ -1,4 +1,3 @@
-from types import NoneType
 import dearpygui.dearpygui as dpg
 from pathfindhost import PathfindingHost
 from math import trunc
@@ -145,7 +144,7 @@ class PathingWindow:
         if (within_x and within_y):
             node = self.pathing_host.node_from_pos((x_cell, y_cell))
 
-            if type(node) == NoneType:
+            if node is None:
                 return
 
             tempstate = node.state
