@@ -46,8 +46,8 @@ class ELPath():
     def __init_window(self):
         with dpg.font_registry():
             dpg.bind_font(dpg.add_font(
-                "resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 20))
-            dpg.set_global_font_scale(1.2)
+                "resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf", 24))
+
 
         with dpg.window(label="ELPath") as self.ELPath_window:
             with dpg.child_window(label="Controls_Info", width=self.SIDEBAR_WIDTH, pos=[10, 10], border=False, no_scrollbar=True):
